@@ -70,7 +70,7 @@ const SettingsModal = ({
                             <div className="time-box">
                                 <input type="number" className="input-text time-input"
                                     value={timerSettings.long} onChange={(e) => updateTime('long', e.target.value)} />
-                                <span className="time-label">Long Brea</span>
+                                <span className="time-label">Long Break</span>
                             </div>
                         </div>
                     </div>
