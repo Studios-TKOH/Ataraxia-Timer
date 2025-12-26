@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-export const useTimer = (initialMode = 'work', customSettings) => {
+export const useTimer = (initialMode = 'work', customSettings, autoStart = false, longBreakInterval = 4) => {
     const settings = customSettings || {
         work: 25,
         short: 5,
@@ -16,23 +16,44 @@ export const useTimer = (initialMode = 'work', customSettings) => {
     const [mode, setMode] = useState(initialMode);
     const [timeLeft, setTimeLeft] = useState(MODES[initialMode].minutes * 60);
     const [isActive, setIsActive] = useState(false);
+    const [cycles, setCycles] = useState(1);
     const audioRef = useRef(new Audio('/sounds/alarm.mp3'));
 
     useEffect(() => {
-        setIsActive(false);
         setTimeLeft(MODES[mode].minutes * 60);
     }, [mode, customSettings]);
 
     useEffect(() => {
         let interval = null;
+
         if (isActive && timeLeft > 0) {
             interval = setInterval(() => setTimeLeft((t) => t - 1), 1000);
         } else if (timeLeft === 0 && isActive) {
-            setIsActive(false);
             playAlarm();
+
+            if (autoStart) {
+                handleAutoSwitch();
+            } else {
+                setIsActive(false);
+            }
         }
+
         return () => clearInterval(interval);
-    }, [isActive, timeLeft]);
+    }, [isActive, timeLeft, autoStart, longBreakInterval]);
+
+    const handleAutoSwitch = () => {
+        if (mode === 'work') {
+            const currentCycle = cycles;
+            if (currentCycle % longBreakInterval === 0) {
+                setMode('long');
+            } else {
+                setMode('short');
+            }
+        } else {
+            setMode('work');
+            setCycles(c => c + 1);
+        }
+    };
 
     const playAlarm = () => {
         audioRef.current.currentTime = 0;
@@ -44,7 +65,9 @@ export const useTimer = (initialMode = 'work', customSettings) => {
 
     const resetTimer = () => {
         setIsActive(false);
-        setTimeLeft(MODES[mode].minutes * 60);
+        setMode('work');
+        setCycles(1);
+        setTimeLeft(MODES['work'].minutes * 60);
     };
 
     const formatTime = () => {
@@ -56,6 +79,7 @@ export const useTimer = (initialMode = 'work', customSettings) => {
     return {
         mode, setMode,
         timeLeft, formatTime,
-        isActive, toggleTimer, resetTimer
+        isActive, toggleTimer, resetTimer,
+        cycles
     };
 };
