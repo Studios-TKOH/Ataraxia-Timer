@@ -14,14 +14,59 @@ const TimerWidget = ({
 
     const currentRound = cycles % longBreakInterval === 0 ? longBreakInterval : cycles % longBreakInterval;
 
-    return (
-        <section className="timer-section" style={{ transform: isInPipMode ? 'scale(0.9)' : 'none' }}>
+    if (isInPipMode) {
+        return (
+            <section style={{
+                width: '100vw',
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                background: '#000',
+                cursor: 'default',
+                userSelect: 'none'
+            }}>
+                <h1 style={{
+                    color: 'white',
+                    fontSize: '28vmin',
+                    fontWeight: 'bold',
+                    margin: 0,
+                    lineHeight: 1,
+                    fontVariantNumeric: 'tabular-nums',
+                    textShadow: '0 0 20px rgba(0,0,0,0.5)'
+                }}>
+                    {formatTime()}
+                </h1>
 
-            {!isInPipMode && (
-                <div className={`timer-controls-fade ${isActive ? 'hidden' : ''}`} style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                    <TimerModes currentMode={mode} setMode={setMode} />
+                <span style={{
+                    color: mode === 'work' ? 'var(--primary-color)' : '#4ade80',
+                    fontSize: '7vmin',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    marginTop: '1vh',
+                    opacity: 0.8
+                }}>
+                    {isActive ? (mode === 'work' ? 'Focus' : 'Break') : 'Paused'}
+                </span>
+
+                <div style={{ marginTop: '5vmin', width: '100%', display: 'flex', justifyContent: 'center' }}>
+                    <Controls
+                        isActive={isActive}
+                        onToggle={toggleTimer}
+                        isInPipMode={true}
+                    />
                 </div>
-            )}
+            </section>
+        );
+    }
+
+    return (
+        <section className="timer-section">
+            <div className={`timer-controls-fade ${isActive ? 'hidden' : ''}`} style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                <TimerModes currentMode={mode} setMode={setMode} />
+            </div>
 
             <CircularDisplay time={formatTime()} isActive={isActive} mode={mode} />
 
@@ -29,7 +74,7 @@ const TimerWidget = ({
                 <div style={{
                     color: 'var(--text-muted)',
                     fontSize: '0.8rem',
-                    marginTop: isInPipMode ? '0rem' : '-1.5rem',
+                    marginTop: '-1.5rem',
                     marginBottom: '2.5rem',
                     letterSpacing: '2px',
                     textAlign: 'center',
@@ -39,13 +84,14 @@ const TimerWidget = ({
                 </div>
             )}
 
-            <div style={{ marginTop: mode === 'work' ? '0' : '2rem', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', width: '100%' }}>
                 <Controls
                     isActive={isActive}
                     onToggle={toggleTimer}
                     onReset={resetTimer}
                     onPipToggle={togglePip}
                     isPipActive={isPipActive}
+                    isInPipMode={false}
                 />
             </div>
         </section>

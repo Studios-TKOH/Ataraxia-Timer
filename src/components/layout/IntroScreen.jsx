@@ -95,7 +95,7 @@ const IntroScreen = ({ onComplete }) => {
             lineHeight: 1.1,
             letterSpacing: '-1px'
           }}>
-            Zenith Timer
+            Ataraxia Timer
           </h1>
 
           <div style={{

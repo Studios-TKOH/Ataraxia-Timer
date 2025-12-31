@@ -24,7 +24,7 @@ const Header = ({ is24Hour }) => {
         <div style={{ padding: '6px', borderRadius: '8px', display: 'flex' }}>
           <Zap size={18} color="white" fill="white" />
         </div>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Zenith Timer</h1>
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Ataraxia Timer</h1>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>

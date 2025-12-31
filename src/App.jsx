@@ -63,7 +63,7 @@ function App() {
           <Header is24Hour={is24Hour} />
         </div>
 
-        <main className="main-layout">
+        <main className="main-layout" >
           {pipWindow ? (
             createPortal(
               <div style={{

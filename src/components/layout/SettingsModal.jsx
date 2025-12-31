@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Image as ImageIcon, Upload, Volume2, Palette, Clock, Zap, Repeat, Monitor, Volume1 } from 'lucide-react';
 
 const SettingsModal = ({
@@ -11,6 +11,19 @@ const SettingsModal = ({
     is24Hour, onFormatChange,
     volume, onVolumeChange
 }) => {
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const handleFileUpload = (e) => {
