@@ -1,85 +1,117 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
-export const useTimer = (initialMode = 'work', customSettings, autoStart = false, longBreakInterval = 4, volume = 0.5) => {
-    const settings = customSettings || {
-        work: 25,
-        short: 5,
-        long: 15
-    };
+const ALARM_SOUND = '/sounds/alarm.mp3';
 
-    const MODES = {
-        work: { label: 'Deep Work', minutes: parseInt(settings.work) },
-        short: { label: 'Short Break', minutes: parseInt(settings.short) },
-        long: { label: 'Long Break', minutes: parseInt(settings.long) },
-    };
-
+export const useTimer = (initialMode, settings, autoStart, longBreakInterval, volume) => {
     const [mode, setMode] = useState(initialMode);
-    const [timeLeft, setTimeLeft] = useState(MODES[initialMode].minutes * 60);
+    const [timeLeft, setTimeLeft] = useState(settings[initialMode] * 60);
     const [isActive, setIsActive] = useState(false);
-    const [cycles, setCycles] = useState(1);
-    const audioRef = useRef(new Audio('/sounds/alarm.mp3'));
+    const [cycles, setCycles] = useState(0);
+
+    const audioRef = useRef(new Audio(ALARM_SOUND));
 
     useEffect(() => {
-        setTimeLeft(MODES[mode].minutes * 60);
-    }, [mode, customSettings]);
-
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = volume;
+        if (!isActive) {
+            setTimeLeft(settings[mode] * 60);
         }
-    }, [volume]);
+    }, [settings, mode]);
+
+    const switchMode = useCallback((newMode) => {
+        setMode(newMode);
+        setTimeLeft(settings[newMode] * 60);
+        setIsActive(false);
+    }, [settings]);
 
     useEffect(() => {
         let interval = null;
 
         if (isActive && timeLeft > 0) {
-            interval = setInterval(() => setTimeLeft((t) => t - 1), 1000);
-        } else if (timeLeft === 0 && isActive) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(e => console.log("Error audio:", e));
-            if (autoStart) {
-                handleAutoSwitch();
-            } else {
-                setIsActive(false);
-            }
+            interval = setInterval(() => {
+                setTimeLeft((prevTime) => prevTime - 1);
+            }, 1000);
+        } else if (timeLeft === 0) {
+            clearInterval(interval);
+            setIsActive(false);
+            handleTimerComplete();
         }
 
         return () => clearInterval(interval);
-    }, [isActive, timeLeft, autoStart, longBreakInterval]);
+    }, [isActive, timeLeft]);
 
-    const handleAutoSwitch = () => {
+    const handleTimerComplete = () => {
+        playAlarm();
+
         if (mode === 'work') {
-            const currentCycle = cycles;
-            if (currentCycle % longBreakInterval === 0) {
-                setMode('long');
+            const newCycles = cycles + 1;
+            setCycles(newCycles);
+
+            if (newCycles % longBreakInterval === 0) {
+                switchMode('long');
             } else {
-                setMode('short');
+                switchMode('short');
             }
         } else {
-            setMode('work');
-            setCycles(c => c + 1);
+            switchMode('work');
+        }
+
+        if (autoStart) {
+            setTimeout(() => setIsActive(true), 1000);
         }
     };
 
-    const toggleTimer = () => setIsActive(!isActive);
+    const playAlarm = () => {
+        const audio = audioRef.current;
+        audio.src = ALARM_SOUND;
+        audio.volume = volume;
+        audio.currentTime = 0;
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log('Audio autoplay prevented:', error);
+            });
+        }
+    };
+
+    const stopAlarm = () => {
+        const audio = audioRef.current;
+        audio.pause();
+        audio.currentTime = 0;
+    };
+
+    const toggleTimer = () => {
+        if (isActive) {
+            setIsActive(false);
+        } else {
+            if (volume > 0) audioRef.current.load();
+            setIsActive(true);
+        }
+    };
 
     const resetTimer = () => {
         setIsActive(false);
-        setMode('work');
-        setCycles(1);
-        setTimeLeft(MODES['work'].minutes * 60);
+        setTimeLeft(settings[mode] * 60);
+        stopAlarm();
     };
 
     const formatTime = () => {
-        const m = Math.floor(timeLeft / 60);
-        const s = timeLeft % 60;
-        return `${m}:${s < 10 ? '0' : ''}${s}`;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
+    useEffect(() => {
+        return () => stopAlarm();
+    }, []);
+
     return {
-        mode, setMode,
-        timeLeft, formatTime,
-        isActive, toggleTimer, resetTimer,
+        mode,
+        setMode: switchMode,
+        timeLeft,
+        formatTime,
+        isActive,
+        toggleTimer,
+        resetTimer,
         cycles
     };
 };

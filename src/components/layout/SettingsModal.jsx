@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { X, Image as ImageIcon, Upload, Volume2, Palette, Clock, Zap, Repeat, Monitor, Volume1 } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { X, Sun, Monitor, Upload, Volume2, VolumeX, Clock } from 'lucide-react';
 
 const SettingsModal = ({
     isOpen, onClose,
@@ -12,246 +12,155 @@ const SettingsModal = ({
     volume, onVolumeChange
 }) => {
 
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
+    const lastVolumeRef = useRef(0.5);
 
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
+    useEffect(() => {
+        document.body.style.overflow = isOpen ? 'hidden' : 'unset';
+        return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
     if (!isOpen) return null;
 
-    const handleFileUpload = (e) => {
+    const safeVolume = Math.min(1, Math.max(0, Number(volume ?? 0.5)));
+    const volPercentage = Math.round(safeVolume * 100);
+
+    const handleVolumeChange = (e) => {
+        onVolumeChange(Number(e.target.value));
+    };
+
+    const toggleMute = () => {
+        if (safeVolume > 0) {
+            lastVolumeRef.current = safeVolume;
+            onVolumeChange(0);
+        } else {
+            onVolumeChange(lastVolumeRef.current || 0.5);
+        }
+    };
+
+    const playTestAlarm = () => {
+        const audio = new Audio('/sounds/alarm.mp3');
+        audio.volume = safeVolume;
+        audio.currentTime = 0;
+        audio.play().catch(console.error);
+    };
+
+    const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
-        if (file.size > 3 * 1024 * 1024) {
-            return alert("Image is too large (Max 3MB). Please choose a smaller one.");
-        }
-
         const reader = new FileReader();
-        reader.onloadend = () => {
-            try {
-                onBgChange(reader.result);
-            } catch (error) {
-                alert("Storage full! Try a smaller image or remove old data.");
-                console.error("Quota exceeded", error);
-            }
-        };
+        reader.onloadend = () => onBgChange(reader.result);
         reader.readAsDataURL(file);
     };
 
-    const updateTime = (key, value) => {
-        onTimerChange({ ...timerSettings, [key]: value });
-    };
-
-    const testSound = () => {
-        const audio = new Audio('/sounds/alarm.mp3');
-        audio.volume = volume;
-        audio.play().catch(e => console.log(e));
-    };
-
     return (
-        <div className="modal-overlay">
-            <div className="modal-content">
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
 
                 <div className="modal-header">
-                    <h3 style={{ margin: 0, fontSize: '1rem' }}>Settings</h3>
-                    <button onClick={onClose} className="btn-icon"><X size={20} /></button>
+                    <span style={{ fontWeight: 600 }}>Settings</span>
+                    <button onClick={onClose} className="btn-icon">
+                        <X size={20} />
+                    </button>
                 </div>
 
-                <div className="modal-body">
+                <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
 
                     <div className="setting-section">
-                        <label className="setting-label"><Monitor size={14} /> System</label>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            background: 'rgba(255,255,255,0.05)',
-                            padding: '12px',
-                            borderRadius: '10px',
-                            border: '1px solid var(--glass-border)'
-                        }}>
-                            <span style={{ fontSize: '0.9rem' }}>24-Hour Clock</span>
-                            <input
-                                type="checkbox"
-                                checked={is24Hour}
-                                onChange={(e) => onFormatChange(e.target.checked)}
-                                style={{
-                                    width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--primary-color)'
-                                }}
-                            />
+                        <div className="setting-label">
+                            <Clock size={14} /> Timer (minutes)
+                        </div>
+                        <div className="time-grid">
+                            <TimeInput label="Deep Work" value={timerSettings.work}
+                                onChange={(v) => onTimerChange({ ...timerSettings, work: v })} />
+                            <TimeInput label="Short Break" value={timerSettings.short}
+                                onChange={(v) => onTimerChange({ ...timerSettings, short: v })} />
+                            <TimeInput label="Long Break" value={timerSettings.long}
+                                onChange={(v) => onTimerChange({ ...timerSettings, long: v })} />
                         </div>
                     </div>
 
                     <div className="setting-section">
-                        <label className="setting-label"><Zap size={14} /> Automation</label>
+                        <div className="setting-label"><Monitor size={14} /> System</div>
 
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            background: 'rgba(255,255,255,0.05)',
-                            padding: '12px',
-                            borderRadius: '10px',
-                            border: '1px solid var(--glass-border)',
-                            marginBottom: '10px'
-                        }}>
-                            <span style={{ fontSize: '0.9rem' }}>Auto-start Cycles</span>
-                            <input
-                                type="checkbox"
-                                checked={autoStart}
-                                onChange={(e) => onAutoStartChange(e.target.checked)}
-                                style={{
-                                    width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--primary-color)'
-                                }}
-                            />
-                        </div>
+                        <Row label="Auto-start Cycles">
+                            <Switch checked={autoStart} onChange={() => onAutoStartChange(!autoStart)} />
+                        </Row>
 
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            background: 'rgba(255,255,255,0.05)',
-                            padding: '12px',
-                            borderRadius: '10px',
-                            border: '1px solid var(--glass-border)'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Repeat size={16} color="var(--text-muted)" />
-                                <span style={{ fontSize: '0.85rem' }}>Long Break Interval</span>
-                            </div>
+                        <Row label="Long Break Interval">
                             <input
                                 type="number"
                                 min="1"
-                                max="99"
+                                max="10"
                                 value={longBreakInterval}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (val === '') onLongBreakIntervalChange('');
-                                    else onLongBreakIntervalChange(Number(val));
-                                }}
-                                onBlur={() => {
-                                    if (!longBreakInterval || longBreakInterval < 1) onLongBreakIntervalChange(4);
-                                }}
+                                onChange={(e) => onLongBreakIntervalChange(Number(e.target.value) || 1)}
                                 className="input-text"
-                                style={{ width: '60px', textAlign: 'center' }}
+                                style={{ width: 50, textAlign: 'center' }}
                             />
-                        </div>
+                        </Row>
+
+                        <Row label="24-Hour Clock">
+                            <Switch checked={is24Hour} onChange={() => onFormatChange(!is24Hour)} />
+                        </Row>
                     </div>
 
                     <div className="setting-section">
-                        <label className="setting-label"><Palette size={14} /> Theme Color</label>
-                        <div className="color-picker-container">
-                            <div className="color-preview" style={{ backgroundColor: accentColor }}></div>
-                            <input
-                                type="color"
-                                className="color-input-real"
-                                value={accentColor}
-                                onChange={(e) => onColorChange(e.target.value)}
-                            />
-                        </div>
-                    </div>
+                        <div className="setting-label"><Sun size={14} /> Appearance</div>
 
-                    <div className="setting-section">
-                        <label className="setting-label"><Clock size={14} /> Duration (Min)</label>
-                        <div className="time-grid">
-                            <div className="time-box">
-                                <input type="number" className="input-text time-input"
-                                    value={timerSettings.work} onChange={(e) => updateTime('work', e.target.value)} />
-                                <span className="time-label">Deep Work</span>
-                            </div>
-                            <div className="time-box">
-                                <input type="number" className="input-text time-input"
-                                    value={timerSettings.short} onChange={(e) => updateTime('short', e.target.value)} />
-                                <span className="time-label">Short Break</span>
-                            </div>
-                            <div className="time-box">
-                                <input type="number" className="input-text time-input"
-                                    value={timerSettings.long} onChange={(e) => updateTime('long', e.target.value)} />
-                                <span className="time-label">Long Break</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="setting-section">
-                        <label className="setting-label"><ImageIcon size={14} /> Background</label>
-                        <input
-                            type="text"
-                            className="input-text"
-                            placeholder="Paste image URL..."
-                            value={currentBg.startsWith('data:') ? '' : currentBg}
-                            onChange={(e) => onBgChange(e.target.value)}
-                            style={{ marginBottom: '10px' }}
-                        />
-
-                        <div className="upload-btn-wrapper">
-                            <label className="btn-upload" style={{ cursor: 'pointer' }}>
-                                <Upload size={16} /> Upload from PC
+                        <Row label="Theme Color">
+                            <div className="color-picker-container">
+                                <div className="color-preview" style={{ backgroundColor: accentColor }} />
                                 <input
-                                    type="file"
-                                    className="upload-input-real"
-                                    accept="image/*"
-                                    onChange={handleFileUpload}
-                                    style={{ display: 'none' }}
+                                    type="color"
+                                    value={accentColor}
+                                    onChange={(e) => onColorChange(e.target.value)}
+                                    className="color-input-real"
                                 />
+                            </div>
+                        </Row>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            <span>Background</span>
+                            <input
+                                type="text"
+                                placeholder="Paste image URL..."
+                                className="input-text"
+                                value={currentBg && !currentBg.startsWith('data:') ? currentBg : ''}
+                                onChange={(e) => onBgChange(e.target.value)}
+                            />
+                            <label className="btn-upload">
+                                <Upload size={16} />
+                                <span>Upload from PC</span>
+                                <input type="file" accept="image/*" onChange={handleImageUpload} className="upload-input-real" />
                             </label>
                         </div>
-
-                        {currentBg && (
-                            <button
-                                onClick={() => onBgChange('')}
-                                style={{
-                                    marginTop: '10px',
-                                    background: 'rgba(255, 59, 48, 0.1)',
-                                    color: '#ff3b30',
-                                    border: '1px solid rgba(255, 59, 48, 0.3)',
-                                    padding: '8px',
-                                    borderRadius: '8px',
-                                    width: '100%',
-                                    cursor: 'pointer',
-                                    fontSize: '0.8rem'
-                                }}
-                            >
-                                Remove Background
-                            </button>
-                        )}
                     </div>
 
-                    <div className="setting-section" style={{ marginBottom: 0 }}>
-                        <label className="setting-label"><Volume2 size={14} /> Sound & Volume</label>
+                    <div className="setting-section">
+                        <div className="setting-label"><Volume2 size={14} /> Sound & Volume</div>
 
-                        <div style={{
-                            background: 'rgba(255,255,255,0.05)',
-                            padding: '15px',
-                            borderRadius: '10px',
-                            border: '1px solid var(--glass-border)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '10px'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <Volume1 size={16} color="var(--text-muted)" />
+                        <div style={{ padding: 16, borderRadius: 12 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 15, marginBottom: 16 }}>
+                                <button onClick={toggleMute} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                    {safeVolume === 0 ? <VolumeX size={22} /> : <Volume2 size={22} />}
+                                </button>
+
                                 <input
                                     type="range"
-                                    min="0" max="1" step="0.05"
-                                    value={volume}
-                                    onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-                                    style={{ width: '100%', accentColor: 'var(--primary-color)', cursor: 'pointer' }}
+                                    min="0"
+                                    max="1"
+                                    step="0.01"
+                                    value={safeVolume}
+                                    onChange={handleVolumeChange}
+                                    style={{ width: '100%', accentColor }}
                                 />
-                                <span style={{ fontSize: '0.8rem', width: '30px', textAlign: 'right' }}>
-                                    {Math.round(volume * 100)}%
+
+                                <span style={{ minWidth: 40, textAlign: 'right' }}>
+                                    {volPercentage}%
                                 </span>
                             </div>
 
-                            <button className="btn-upload" onClick={testSound} style={{ textAlign: 'center', width: '100%' }}>
-                                Test Alarm
+                            <button onClick={playTestAlarm} className="btn-upload" style={{ width: '100%' }}>
+                                Test Alarm Sound
                             </button>
                         </div>
                     </div>
@@ -261,5 +170,51 @@ const SettingsModal = ({
         </div>
     );
 };
+
+const Row = ({ label, children }) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <span>{label}</span>
+        {children}
+    </div>
+);
+
+const TimeInput = ({ label, value, onChange }) => (
+    <div className="time-box">
+        <input
+            type="number"
+            value={value}
+            onChange={(e) => onChange(parseInt(e.target.value) || 0)}
+            className="input-text time-input"
+        />
+        <label className="time-label">{label}</label>
+    </div>
+);
+
+const Switch = ({ checked, onChange }) => (
+    <div
+        onClick={onChange}
+        style={{
+            width: 44,
+            height: 24,
+            background: checked ? 'var(--primary-purple)' : 'rgba(255,255,255,0.1)',
+            borderRadius: 20,
+            position: 'relative',
+            cursor: 'pointer'
+        }}
+    >
+        <div
+            style={{
+                width: 18,
+                height: 18,
+                background: '#fff',
+                borderRadius: '50%',
+                position: 'absolute',
+                top: 3,
+                left: checked ? 22 : 3,
+                transition: 'left 0.3s'
+            }}
+        />
+    </div>
+);
 
 export default SettingsModal;

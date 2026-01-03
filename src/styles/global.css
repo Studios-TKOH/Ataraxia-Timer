@@ -87,7 +87,7 @@ body {
 .tasks-section {
     width: 100%;
     height: 400px;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
 }
 
 .timer-controls-fade {
@@ -99,46 +99,137 @@ body {
     pointer-events: none;
 }
 
-.bottom-controls {
-    position: absolute;
+.dock-container {
+    position: fixed;
     bottom: 2rem;
-    right: 2rem;
     display: flex;
-    gap: 1rem;
-    transition: opacity 0.3s ease;
-    z-index: 10;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 15, 15, 0.6);
+    backdrop-filter: blur(12px);
+    padding: 6px;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    z-index: 50;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.bottom-controls.hidden {
+.dock-left {
+    left: 2rem;
+}
+
+.dock-right {
+    right: 2rem;
+}
+
+.dock-hidden {
     opacity: 0;
     pointer-events: none;
+    transform: translateY(20px);
 }
 
-@media (max-width: 576px) {
-    .bottom-controls {
-        bottom: 1.5rem;
-        right: 1.5rem;
-    }
-}
-
-.control-btn-floating {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
+.dock-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    background: transparent;
     color: var(--text-muted);
-    width: 45px;
-    height: 45px;
-    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
 }
 
-.control-btn-floating:hover {
+.dock-btn svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2px;
+    transition: transform 0.2s ease;
+}
+
+.dock-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     color: white;
+    border-color: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
+}
+
+.dock-btn:active {
+    transform: scale(0.95);
+}
+
+.dock-btn.active {
+    background: rgba(139, 92, 246, 0.2);
+    color: var(--primary-purple);
+    border-color: rgba(139, 92, 246, 0.4);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.dock-btn.active svg {
+    stroke-width: 2.5px;
+}
+
+.volume-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.volume-popup {
+    position: absolute;
+    bottom: 55px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 120px;
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.volume-wrapper:hover .volume-popup {
+    opacity: 1;
+    visibility: visible;
+    bottom: 60px;
+}
+
+.vertical-slider {
+    width: 100px;
+    height: 40px;
+    transform: rotate(-90deg);
+    background: transparent;
+    cursor: pointer;
+    appearance: none;
+}
+
+.vertical-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.vertical-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: var(--primary-purple);
+    margin-top: -6px;
+    box-shadow: 0 0 10px var(--primary-purple);
+    border: 2px solid white;
 }
 
 .modal-overlay {
@@ -162,6 +253,7 @@ body {
     border: 1px solid var(--glass-border);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     overflow: hidden;
+    animation: modalPop 0.3s ease;
 }
 
 .modal-header {
@@ -268,64 +360,31 @@ body {
     cursor: pointer;
 }
 
-.volume-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+@keyframes modalPop {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
-.volume-popup {
-    position: absolute;
-    bottom: 55px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 120px;
-    background: rgba(20, 20, 20, 0.8);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(10px);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
+@media (max-width: 576px) {
+    .dock-container {
+        bottom: 1.5rem;
+        padding: 4px;
+    }
 
-.volume-wrapper:hover .volume-popup {
-    opacity: 1;
-    visibility: visible;
-    bottom: 60px;
-}
+    .dock-left {
+        left: 1rem;
+    }
 
-.vertical-slider {
-    width: 100px;
-    height: 40px;
-    transform: rotate(-90deg);
-    background: transparent;
-    cursor: pointer;
-    appearance: none;
-}
-
-.vertical-slider::-webkit-slider-runnable-track {
-    width: 100%;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-}
-
-.vertical-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    height: 16px;
-    width: 16px;
-    border-radius: 50%;
-    background: var(--primary-purple);
-    margin-top: -6px;
-    box-shadow: 0 0 10px var(--primary-purple);
-    border: 2px solid white;
+    .dock-right {
+        right: 1rem;
+    }
 }
 
 @media (min-width: 576px) {
@@ -333,24 +392,16 @@ body {
         max-width: 540px;
         padding: 0;
     }
-
-    .bottom-controls {
-        bottom: 2rem;
-        right: 1.5rem;
-        padding: 5px;
-        border-radius: 14px;
-        backdrop-filter: blur(4px);
-    }
 }
 
 @media (min-width: 768px) {
     .app-wrapper {
-        max-width: 720px;
+        max-width: 900px;
     }
 
     .main-layout {
         flex-direction: row;
-        align-items: center;
+        justify-content: center;
         gap: 2rem;
         padding-bottom: 0;
     }
@@ -363,10 +414,6 @@ body {
     .tasks-section {
         width: 50%;
         height: 500px;
-    }
-
-    .bottom-controls {
-        bottom: 1rem;
     }
 }
 
@@ -389,18 +436,6 @@ body {
 @media (min-width: 1400px) {
     .app-wrapper {
         max-width: 1320px;
-    }
-}
-
-@keyframes modalPop {
-    from {
-        opacity: 0;
-        transform: scale(0.95) translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
     }
 }
 
