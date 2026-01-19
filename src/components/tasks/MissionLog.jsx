@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, CheckCircle2, Circle, GripVertical, Loader2 } from 'lucide-react';
 import { tasksService } from '../../api/tasks.service';
+import { useAuth } from '../../context/auth-context';
 
 const MissionLog = () => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
+  const { user, token, loading: authLoading, initialized } = useAuth();
 
   useEffect(() => {
+    if (!initialized) return;
+    if (loading) return;
+    if (!token) return;
+    if (user?.isGuest) return;
+
     loadTasks();
-  }, []);
+  }, [initialized, loading, token, user]);
 
   const loadTasks = async () => {
     try {
       const data = await tasksService.getAll();
-      setTasks(data);
+      setTasks(data || []);
     } catch (error) {
       console.error("Error loading tasks", error);
+      setTasks([]);
     } finally {
       setLoading(false);
     }

@@ -101,10 +101,10 @@ body {
 
 .dock-container {
     position: fixed;
-    bottom: 2rem;
+    bottom: 1rem;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     background: rgba(15, 15, 15, 0.6);
     backdrop-filter: blur(12px);
     padding: 6px;

@@ -1,5 +1,5 @@
 ```
-└── 📁pomodoro 
+└── 📁pomodoro
     └── 📁public
         └── 📁sounds
             ├── alarm.mp3
@@ -9,6 +9,7 @@
             ├── auth.service.ts
             ├── client.ts
             ├── settings.service.ts
+            ├── spotify.service.js
             ├── tags.service.ts
             ├── tasks.service.ts
             ├── timers.service.ts
@@ -21,7 +22,10 @@
                 ├── IntroScreen.jsx
                 ├── MusicWidget.jsx
                 ├── SettingsModal.jsx
+                ├── SpotifyCallback.jsx
                 ├── SupportModal.jsx
+            └── 📁spotify
+                ├── SpotifyPlayerUI.jsx
             └── 📁tasks
                 ├── MissionLog.jsx
             └── 📁timer
@@ -41,11 +45,13 @@
         └── 📁hooks
             ├── useLocalStorage.js
             ├── usePip.js
+            ├── useSpotifyPlayer.js
             ├── useTimer.js
         └── 📁styles
             ├── global.css
         └── 📁utils
             ├── buildSettingsPayload.js
+            ├── timer.utils.js
         ├── App.jsx
         ├── main.jsx
         ├── vite-env.d.ts
@@ -56,5 +62,6 @@
     ├── package-lock.json
     ├── package.json
     ├── README.md
+    ├── Structure.md
     └── vite.config.js
 ```

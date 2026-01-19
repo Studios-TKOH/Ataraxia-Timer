@@ -11,12 +11,14 @@ export const AuthProvider = ({ children }) => {
 
     const [token, setToken] = useState(() => localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
+    const [initialized, setInitialized] = useState(false);
 
     useEffect(() => {
         if (token) {
             apiClient.defaults.headers.Authorization = `Bearer ${token}`;
         }
         setLoading(false);
+        setInitialized(true);
     }, [token]);
 
     useEffect(() => {
@@ -86,33 +88,39 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-
     const login = async (email, password) => {
         try {
             const data = await authService.login({ email, password });
-    
+            const token = extractToken(data);
+
+            const stored = localStorage.getItem('dw-user');
+            const previousUser = stored ? JSON.parse(stored) : null;
+
+            const user = {
+                ...data.user,
+                name: data.user.name ?? previousUser?.name ?? email.split('@')[0]
+            };
+
+            saveSession(token, user);
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: 'Error' };
+        }
+    };
+
+    const register = async (name, email, password) => {
+        try {
+            const deviceId = getDeviceId();
+            const data = await authService.register({ name, email, password, deviceId });
+
             const token = extractToken(data);
             saveSession(token, data.user);
-    
+
             return { success: true };
         } catch (error) {
             return { success: false, message: error.response?.data?.message || 'Error' };
         }
     };
-    
-    const register = async (name, email, password) => {
-        try {
-            const deviceId = getDeviceId();
-            const data = await authService.register({ name, email, password, deviceId });
-    
-            const token = extractToken(data);
-            saveSession(token, data.user);
-    
-            return { success: true };
-        } catch (error) {
-            return { success: false, message: error.response?.data?.message || 'Error' };
-        }
-    };  
 
     const logout = () => {
         setUser(null);
@@ -123,7 +131,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, loginAsGuest, login, register, logout }}>
+        <AuthContext.Provider value={{ user, token, loading, initialized, loginAsGuest, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

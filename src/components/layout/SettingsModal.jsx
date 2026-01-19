@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Sun, Monitor, Upload, Volume2, Clock, User, LogOut, Save } from 'lucide-react';
+import { X, Sun, Monitor, Upload, Volume2, Clock, User, LogOut, Save, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/auth-context';
 import { settingsService } from '../../api/settings.service';
 import { tagsService } from '../../api/tags.service';
@@ -70,8 +70,6 @@ const SettingsModal = ({
             theme: 'default',
             soundEnabled: volume > 0
         };
-
-        //console.log(payload);
 
         if (
             payload.focusDuration ||
@@ -247,11 +245,34 @@ const SettingsModal = ({
                             </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
-                            <input
-                                type="text" placeholder="Background Image URL..." className="input-text"
-                                value={currentBg && !currentBg.startsWith('data:') ? currentBg : ''}
-                                onChange={(e) => onBgChange(e.target.value)}
-                            />
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <input
+                                    type="text" placeholder="Background Image URL..." className="input-text"
+                                    value={currentBg && !currentBg.startsWith('data:') ? currentBg : ''}
+                                    onChange={(e) => onBgChange(e.target.value)}
+                                    style={{ flex: 1 }}
+                                />
+                                {currentBg && (
+                                    <button
+                                        onClick={() => onBgChange('')}
+                                        className="btn-icon"
+                                        style={{
+                                            background: 'rgba(239, 68, 68, 0.2)',
+                                            color: '#fca5a5',
+                                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                                            borderRadius: '8px',
+                                            height: '42px',
+                                            width: '42px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                        title="Remove Background"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                )}
+                            </div>
                             <label className="btn-upload">
                                 <Upload size={16} /> <span>Upload from Device</span>
                                 <input type="file" accept="image/*" onChange={handleImageUpload} hidden />

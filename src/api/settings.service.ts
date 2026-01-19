@@ -13,7 +13,6 @@ const sanitizeSettings = (data: CreateSettingDto) => {
     return clean;
 };
 
-
 export const settingsService = {
     getSettings: async () => {
         try {
