@@ -48,7 +48,7 @@ const SpotifyCallback = () => {
                 borderRadius: '50%',
                 animation: 'spin 1s linear infinite'
             }} />
-            <h3 style={{ fontWeight: 400, opacity: 0.8 }}>Conectando con Spotify...</h3>
+            <h3 style={{ fontWeight: 400, opacity: 0.8 }}>Connecting to Spotify...</h3>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
