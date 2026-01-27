@@ -20,14 +20,13 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        const originalRequestUrl = error.config?.url || '';
+        if (axios.isAxiosError(error)) {
+            const status = error.response?.status;
+            const code = error.response?.data?.code;
 
-        const isAuthRequest = originalRequestUrl.includes('/auth/login') ||
-            originalRequestUrl.includes('/auth/register') ||
-            originalRequestUrl.includes('/auth/guest-login');
-
-        if (error.response && error.response.status === 401 && !isAuthRequest) {
-            window.dispatchEvent(new Event('auth:logout'));
+            if (status === 401 && code === 'AUTH_EXPIRED') {
+                window.dispatchEvent(new Event('auth:logout'));
+            }
         }
 
         return Promise.reject(error);
