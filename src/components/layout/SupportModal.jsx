@@ -62,12 +62,15 @@ const SupportModal = ({ isOpen, onClose }) => {
                             </div>
                         </a>
 
-                        {/* <div style={{ marginTop: '1rem', padding: '15px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <Heart size={20} fill="#8b5cf6" color="#8b5cf6" />
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                                Enjoying the app? <strong style={{ color: '#8b5cf6', cursor: 'pointer' }}>Buy me a coffee</strong>
-                            </span>
-                        </div> */}
+                        <a href="https://buymeacoffee.com/avid0" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                            <div className="support-item">
+                                <div className="bg-purple support-icon"><Heart size={18} color="#c084fc" /></div>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span className="support-title">Buy me a coffee</span>
+                                    <span className="support-desc">Support the development</span>
+                                </div>
+                            </div>
+                        </a>
 
                     </div>
                 </div>
@@ -98,6 +101,7 @@ const SupportModal = ({ isOpen, onClose }) => {
                 .bg-red { background: rgba(248, 113, 113, 0.2); }
                 .bg-blue { background: rgba(96, 165, 250, 0.2); }
                 .bg-dark { background: rgba(255, 255, 255, 0.1); }
+                .bg-purple { background: rgba(168, 85, 247, 0.2); }
                 
                 .support-title { font-size: 0.95rem; font-weight: 600; color: white; }
                 .support-desc { font-size: 0.8rem; color: var(--text-muted); }
