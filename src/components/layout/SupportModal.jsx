@@ -52,16 +52,6 @@ const SupportModal = ({ isOpen, onClose }) => {
                             </div>
                         </a>
 
-                        <a href="https://github.com/VaCris/Ataraxia-Timer" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
-                            <div className="support-item">
-                                <div className="bg-dark support-icon"><Github size={18} color="white" /></div>
-                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span className="support-title">Contribute</span>
-                                    <span className="support-desc">Check the code on GitHub</span>
-                                </div>
-                            </div>
-                        </a>
-
                         <a href="https://buymeacoffee.com/avid0" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
                             <div className="support-item">
                                 <div className="bg-purple support-icon"><Heart size={18} color="#c084fc" /></div>
