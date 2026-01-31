@@ -87,7 +87,8 @@ function App() {
   }, [user, token]);
 
   useEffect(() => {
-    if (!loading && !user && !showIntro) {
+    const storedToken = localStorage.getItem('token');
+    if (!loading && !user && !storedToken && !showIntro) {
       loginAsGuest();
     }
   }, [loading, user, showIntro]);
@@ -178,7 +179,7 @@ function App() {
                 </div>
 
                 <section className="tasks-section">
-                  <MissionLog />
+                  <MissionLog key={user?.id || 'guest'} />
                 </section>
               </main>
 

@@ -13,24 +13,10 @@ const MissionLog = () => {
   const [editingText, setEditingText] = useState('');
   const inputRef = useRef(null);
 
-  const { user, token, loading: authLoading, initialized } = useAuth();
-
-  useEffect(() => {
-    if (!initialized) return;
-    if (loading) return;
-    if (!token) return;
-    if (user?.isGuest) return;
-
-    loadTasks();
-  }, [initialized, loading, token, user]);
-
-  useEffect(() => {
-    if (editingTaskId && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [editingTaskId]);
+  const { user, token, initialized } = useAuth();
 
   const loadTasks = async () => {
+    setLoading(true);
     try {
       const data = await tasksService.getAll();
       setTasks(data || []);
@@ -41,6 +27,18 @@ const MissionLog = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (initialized && token && !user?.isGuest) {
+      loadTasks();
+    }
+  }, [initialized, token, user]);
+
+  useEffect(() => {
+    if (editingTaskId && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [editingTaskId]);
 
   const addTask = async (e) => {
     e.preventDefault();
