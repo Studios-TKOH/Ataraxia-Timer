@@ -33,13 +33,17 @@ apiClient.interceptors.response.use(
         if (axios.isAxiosError(error)) {
             const status = error.response?.status;
             const code = error.response?.data?.code;
-            if (!error.response || status === 503 || status === 502) {
+
+            if (!error.response || status === 503 || status === 502 || status === 504) {
                 if (!isServerDown) {
                     isServerDown = true;
                     window.dispatchEvent(new CustomEvent('server:down'));
-                    setTimeout(() => { isServerDown = false; }, 30000);
+                    setTimeout(() => {
+                        isServerDown = false;
+                    }, 30000);
                 }
             }
+
             if (status === 401 && code === 'AUTH_EXPIRED') {
                 window.dispatchEvent(new Event('auth:logout'));
             }
