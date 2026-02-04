@@ -47,10 +47,7 @@ const FocusFlight = ({ onClose }) => {
         }
     });
 
-    const bird = useRef({
-        x: 50, y: 150, radius: 12,
-        gravity: 0.25, thrust: 4.5, velocity: 0, rotation: 0, frame: 0
-    });
+    const bird = useRef({ x: 50, y: 150, radius: 12, gravity: 0.25, thrust: 4.5, velocity: 0, rotation: 0, frame: 0 });
     const pipes = useRef([]);
     const frames = useRef(0);
     const sfxPlayed = useRef(false);
@@ -70,11 +67,11 @@ const FocusFlight = ({ onClose }) => {
         const ctx = canvas.getContext('2d');
 
         const update = () => {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             frames.current++;
 
             if (gameState === 'play') {
                 if (frames.current % 5 === 0) bird.current.frame = (bird.current.frame + 1) % 3;
-
                 bird.current.velocity += bird.current.gravity;
                 bird.current.y += bird.current.velocity;
 
@@ -112,6 +109,7 @@ const FocusFlight = ({ onClose }) => {
                     setGameState('gameOver');
                 }
             }
+
             draw(ctx);
             requestRef.current = requestAnimationFrame(update);
         };
@@ -128,7 +126,9 @@ const FocusFlight = ({ onClose }) => {
             ctx.translate(bird.current.x, bird.current.y);
             ctx.rotate(bird.current.rotation * RAD);
             const bSprite = assets.current.sprites.bird[bird.current.frame];
-            ctx.drawImage(bSprite, -bSprite.width / 2, -bSprite.height / 2);
+            if (bSprite.complete) {
+                ctx.drawImage(bSprite, -bSprite.width / 2, -bSprite.height / 2);
+            }
             ctx.restore();
 
             ctx.fillStyle = "white"; ctx.strokeStyle = "black"; ctx.lineWidth = 2;
@@ -138,7 +138,7 @@ const FocusFlight = ({ onClose }) => {
 
         requestRef.current = requestAnimationFrame(update);
         return () => cancelAnimationFrame(requestRef.current);
-    }, [gameState, score, highScore]);
+    }, [gameState]);
 
     const handleInteraction = (e) => {
         if (e) e.preventDefault();
@@ -150,8 +150,9 @@ const FocusFlight = ({ onClose }) => {
             assets.current.sfx.flap.play();
             bird.current.velocity = bird.current.thrust * -1;
         } else if (gameState === 'gameOver') {
-            bird.current.y = 150; bird.current.velocity = 0; pipes.current = [];
-            setScore(0); sfxPlayed.current = false; setGameState('getReady');
+            bird.current.y = 150; bird.current.velocity = 0; bird.current.rotation = 0;
+            pipes.current = []; frames.current = 0; sfxPlayed.current = false;
+            setScore(0); setGameState('getReady');
         }
     };
 
@@ -184,7 +185,7 @@ const FocusFlight = ({ onClose }) => {
                 .game-container { background: #0a0a0a; border: 1px solid #8b5cf6; border-radius: 20px; width: 276px; overflow: hidden; }
                 .game-header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; color: #8b5cf6; }
                 .close-btn { background: none; border: none; color: #666; cursor: pointer; }
-                .canvas-wrapper { position: relative; cursor: pointer; }
+                .canvas-wrapper { position: relative; cursor: pointer; width: 276px; height: 414px; }
                 .game-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
                 .restart-btn { pointer-events: auto; margin-top: 20px; padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; }
             `}</style>

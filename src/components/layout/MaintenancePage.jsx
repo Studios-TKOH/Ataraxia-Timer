@@ -41,7 +41,11 @@ const MaintenancePage = () => {
                 </div>
             </div>
 
-            {showGame && <FocusFlight onClose={() => setShowGame(false)} />}
+            {showGame && (
+                <div className="game-modal-wrapper">
+                    <FocusFlight onClose={() => setShowGame(false)} />
+                </div>
+            )}
 
             <style>{`
                 .maintenance-wrapper {
@@ -179,31 +183,26 @@ const MaintenancePage = () => {
                 .animate-spin { animation: spin 1s linear infinite; }
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-                .game-modal {
+                .game-modal-wrapper {
                     position: fixed;
                     inset: 0;
-                    background: rgba(0, 0, 0, 0.95);
-                    backdrop-filter: blur(15px);
+                    z-index: 10000;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    z-index: 10000;
-                    animation: fadeIn 0.3s ease;
+                    background: rgba(0, 0, 0, 0.8);
+                    backdrop-filter: blur(10px);
+                    animation: modalEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                 }
 
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
+                @keyframes modalEnter {
+                    from { opacity: 0; transform: scale(0.9); }
+                    to { opacity: 1; transform: scale(1); }
                 }
 
-                .game-container {
-                    background: #0a0a0a;
-                    border: 1px solid rgba(139, 92, 246, 0.3);
-                    border-radius: 24px;
-                    width: 340px;
-                    overflow: hidden;
-                    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-                }
+                .animate-spin-slow { animation: spin 8s linear infinite; }
+                .animate-spin { animation: spin 1s linear infinite; }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
             `}</style>
         </div>
     );
