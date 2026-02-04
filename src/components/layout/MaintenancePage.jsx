@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Play, Settings } from 'lucide-react';
-import FocusFlight from '@/games/FocusFlight';
+import FocusFlight from '../games/FocusFlight';
 
 const MaintenancePage = () => {
     const [isRetrying, setIsRetrying] = useState(false);
