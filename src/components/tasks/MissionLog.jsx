@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, CheckCircle2, Circle, GripVertical, Loader2 } from 'lucide-react';
 import { tasksService } from '../../api/tasks.service';
 import { useAuth } from '../../context/auth-context';
+import { useAchievements } from '../../context/achievement-context';
+import AdBanner from '../layout/AdBanner';
 
-const MissionLog = () => {
+const MissionLog = ({ showAd }) => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,6 +16,7 @@ const MissionLog = () => {
   const inputRef = useRef(null);
 
   const { user, token, initialized } = useAuth();
+  const { refreshAchievements } = useAchievements();
 
   const loadTasks = async () => {
     setLoading(true);
@@ -48,6 +51,7 @@ const MissionLog = () => {
       const savedTask = await tasksService.create({ title: newTask });
       setTasks([...tasks, savedTask]);
       setNewTask('');
+      refreshAchievements();
     } catch (error) {
       console.error("Error adding task", error);
     }
@@ -57,6 +61,10 @@ const MissionLog = () => {
     try {
       const updatedTask = await tasksService.update(task.id, { completed: !task.completed });
       setTasks(tasks.map(t => t.id === task.id ? updatedTask : t));
+
+      if (updatedTask.completed) {
+        refreshAchievements();
+      }
     } catch (error) {
       console.error("Error toggling task", error);
     }
@@ -66,6 +74,7 @@ const MissionLog = () => {
     try {
       await tasksService.delete(id);
       setTasks(tasks.filter(t => t.id !== id));
+      refreshAchievements();
     } catch (error) {
       console.error("Error deleting task", error);
     }
@@ -208,83 +217,87 @@ const MissionLog = () => {
             There are no active missions.
           </div>
         ) : (
-          tasks.map((task, index) => (
-            <div
-              key={task.id}
-              draggable={editingTaskId === null}
-              onDragStart={() => handleDragStart(index)}
-              onDragOver={handleDragOver}
-              onDrop={() => handleDrop(index)}
-              onDoubleClick={() => startEditing(task)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                background: task.completed ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
-                padding: '12px',
-                borderRadius: '12px',
-                transition: 'all 0.2s',
-                opacity: draggedItemIndex === index ? 0.4 : (task.completed ? 0.6 : 1),
-                border: draggedItemIndex === index ? '1px dashed var(--text-muted)' : (editingTaskId === task.id ? '1px solid var(--primary-color)' : '1px solid transparent'),
-                cursor: editingTaskId === task.id ? 'text' : 'grab'
-              }}
-              onMouseEnter={(e) => { if (editingTaskId !== task.id) e.currentTarget.style.borderColor = 'var(--glass-border)' }}
-              onMouseLeave={(e) => {
-                if (draggedItemIndex !== index && editingTaskId !== task.id) e.currentTarget.style.borderColor = 'transparent'
-              }}
-            >
-              <div style={{ cursor: 'grab', color: 'var(--text-muted)', display: 'flex' }}>
-                <GripVertical size={14} />
-              </div>
-
-              <button
-                onClick={(e) => { e.stopPropagation(); toggleTask(task); }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: task.completed ? 'var(--primary-color)' : 'var(--text-muted)', padding: 0, display: 'flex' }}
+          <>
+            {tasks.map((task, index) => (
+              <div
+                key={task.id}
+                draggable={editingTaskId === null}
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={handleDragOver}
+                onDrop={() => handleDrop(index)}
+                onDoubleClick={() => startEditing(task)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  background: task.completed ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  transition: 'all 0.2s',
+                  opacity: draggedItemIndex === index ? 0.4 : (task.completed ? 0.6 : 1),
+                  border: draggedItemIndex === index ? '1px dashed var(--text-muted)' : (editingTaskId === task.id ? '1px solid var(--primary-color)' : '1px solid transparent'),
+                  cursor: editingTaskId === task.id ? 'text' : 'grab'
+                }}
+                onMouseEnter={(e) => { if (editingTaskId !== task.id) e.currentTarget.style.borderColor = 'var(--glass-border)' }}
+                onMouseLeave={(e) => {
+                  if (draggedItemIndex !== index && editingTaskId !== task.id) e.currentTarget.style.borderColor = 'transparent'
+                }}
               >
-                {task.completed ? <CheckCircle2 size={20} /> : <Circle size={20} />}
-              </button>
+                <div style={{ cursor: 'grab', color: 'var(--text-muted)', display: 'flex' }}>
+                  <GripVertical size={14} />
+                </div>
 
-              {editingTaskId === task.id ? (
-                <input
-                  ref={inputRef}
-                  value={editingText}
-                  onChange={(e) => setEditingText(e.target.value)}
-                  onBlur={() => saveEdit(task.id)}
-                  onKeyDown={(e) => handleEditKeyDown(e, task.id)}
-                  style={{
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleTask(task); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: task.completed ? 'var(--primary-color)' : 'var(--text-muted)', padding: 0, display: 'flex' }}
+                >
+                  {task.completed ? <CheckCircle2 size={20} /> : <Circle size={20} />}
+                </button>
+
+                {editingTaskId === task.id ? (
+                  <input
+                    ref={inputRef}
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    onBlur={() => saveEdit(task.id)}
+                    onKeyDown={(e) => handleEditKeyDown(e, task.id)}
+                    style={{
+                      flex: 1,
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      outline: 'none',
+                      fontFamily: 'inherit',
+                      padding: 0,
+                      margin: 0
+                    }}
+                  />
+                ) : (
+                  <span style={{
                     flex: 1,
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'white',
                     fontSize: '0.9rem',
-                    outline: 'none',
-                    fontFamily: 'inherit',
-                    padding: 0,
-                    margin: 0
-                  }}
-                />
-              ) : (
-                <span style={{
-                  flex: 1,
-                  fontSize: '0.9rem',
-                  textDecoration: task.completed ? 'line-through' : 'none',
-                  color: task.completed ? 'var(--text-muted)' : 'white',
-                  wordBreak: 'break-word',
-                  userSelect: 'none'
-                }}>
-                  {task.title}
-                </span>
-              )}
+                    textDecoration: task.completed ? 'line-through' : 'none',
+                    color: task.completed ? 'var(--text-muted)' : 'white',
+                    wordBreak: 'break-word',
+                    userSelect: 'none'
+                  }}>
+                    {task.title}
+                  </span>
+                )}
 
-              <button
-                onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', opacity: 0.6, padding: 0, display: 'flex' }}
-                title="Delete Mission"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          ))
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', opacity: 0.6, padding: 0, display: 'flex' }}
+                  title="Delete Mission"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+
+            {showAd && <AdBanner />}
+          </>
         )}
       </div>
 
