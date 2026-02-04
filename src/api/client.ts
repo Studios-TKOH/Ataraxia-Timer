@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta as any).env.VITE_API_URL;
 let isServerDown = false;
 
 export const apiClient = axios.create({
@@ -11,7 +11,7 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-    if (isServerDown) {
+    if (isServerDown && !config.url?.includes('auth')) {
         const controller = new AbortController();
         config.signal = controller.signal;
         controller.abort("Server is currently offline");
@@ -34,10 +34,15 @@ apiClient.interceptors.response.use(
             const status = error.response?.status;
             const code = error.response?.data?.code;
 
-            if (!error.response || status === 503 || status === 502 || status === 504) {
+            const isNetworkError = !error.response && error.code !== 'ERR_CANCELED';
+
+            const isCriticalStatus = status !== undefined && status >= 502 && status <= 504;
+
+            if ((isNetworkError || isCriticalStatus) && window.location.pathname !== '/maintenance') {
                 if (!isServerDown) {
                     isServerDown = true;
                     window.dispatchEvent(new CustomEvent('server:down'));
+
                     setTimeout(() => {
                         isServerDown = false;
                     }, 30000);
