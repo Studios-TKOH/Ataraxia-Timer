@@ -76,7 +76,6 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (userData) => {
-        setLoading(true);
         try {
             const data = await authService.register(userData);
             const newToken = data.token || data.access_token;
@@ -86,7 +85,6 @@ export const AuthProvider = ({ children }) => {
             const message = error.response?.data?.message || "Registration failed";
             return { success: false, error: message };
         } finally {
-            setLoading(false);
         }
     };
 
