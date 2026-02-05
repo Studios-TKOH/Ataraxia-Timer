@@ -14,6 +14,9 @@ export const authService = {
 
     guestLogin: async (data: GuestLoginDto) => {
         const response = await apiClient.post<AuthResponse>('/auth/guest-login', data);
-        return response.data;
+        return {
+            ...response.data,
+            access_token: response.data.access_token
+        };
     }
 };

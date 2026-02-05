@@ -54,13 +54,21 @@ export const AuthProvider = ({ children }) => {
         try {
             const deviceId = localStorage.getItem('device_id') || crypto.randomUUID();
             localStorage.setItem('device_id', deviceId);
+
             const data = await authService.guestLogin({ deviceId });
 
-            const newToken = data.token || data.access_token;
-            const guestUser = { ...(data.user || {}), isGuest: true, username: 'Guest' };
+            const newToken = data.access_token;
 
-            saveSession(newToken, guestUser);
-            return true;
+            const newUser = {
+                ...data.user,
+                username: 'Guest'
+            };
+
+            if (newToken && newUser) {
+                saveSession(newToken, newUser);
+                return true;
+            }
+            return false;
         } catch (error) {
             console.error("Guest login failed:", error);
             return false;

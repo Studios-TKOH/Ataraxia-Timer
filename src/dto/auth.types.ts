@@ -15,7 +15,8 @@ export interface GuestLoginDto {
 }
 
 export interface AuthResponse {
-    token: string;
+    access_token: string;
+    refresh_token?: string;
     user: {
         id: string;
         email: string;

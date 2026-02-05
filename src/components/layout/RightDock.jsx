@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { Settings, Volume2, VolumeX, Maximize, HelpCircle, Trophy } from 'lucide-react';
-
+import toast from 'react-hot-toast';
 const RightDock = ({
     isActive,
     volume,

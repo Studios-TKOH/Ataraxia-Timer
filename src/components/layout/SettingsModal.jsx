@@ -4,6 +4,7 @@ import { useAuth } from '../../context/auth-context';
 import { settingsService } from '../../api/settings.service';
 import { tagsService } from '../../api/tags.service';
 import AuthForm from '../auth/AuthForm';
+import toast from 'react-hot-toast';
 
 const SettingsModal = ({
     isOpen, onClose, currentBg, onBgChange, accentColor, onColorChange,
@@ -27,6 +28,7 @@ const SettingsModal = ({
 
     const saveSettings = async () => {
         if (!user || user.isGuest) return;
+
         const payload = {
             focusDuration: Number(timerSettings.work) || 25,
             shortBreakDuration: Number(timerSettings.short) || 5,
@@ -34,14 +36,15 @@ const SettingsModal = ({
             autoStartBreaks: autoStart,
             autoStartPomodoros: autoStart,
             longBreakInterval: Number(longBreakInterval) || 4,
-            theme: 'light',
+            theme: accentColor,
             soundEnabled: volume > 0,
             platform: 'web'
         };
+
         try {
             await settingsService.saveSettings(payload);
         } catch (err) {
-            console.error('Failed to save settings:', err);
+            console.error('Cloud sync failed:', err);
         }
     };
 
@@ -50,12 +53,24 @@ const SettingsModal = ({
         try {
             const tags = await tagsService.getAll();
             const focusTag = tags.find(tag => tag.name === 'Focus');
-            if (focusTag) await tagsService.update(focusTag.id, { color: accentColor });
-            else await tagsService.create({ name: 'Focus', color: accentColor });
-        } catch (error) { console.error('Tag save failed:', error); }
+            if (focusTag) {
+                await tagsService.update(focusTag.id, { color: accentColor });
+            } else {
+                await tagsService.create({ name: 'Focus', color: accentColor });
+            }
+        } catch (error) {
+            console.error('Tag sync failed:', error);
+        }
     };
 
-    const saveAll = () => Promise.all([saveSettings(), saveTagColor()]);
+    const saveAll = async () => {
+        if (user && !user.isGuest) {
+            await Promise.all([saveSettings(), saveTagColor()]);
+            toast.success('Settings synced to cloud! ☁️');
+        } else {
+            toast.success('Settings saved locally');
+        }
+    };
 
     const playTestAlarm = () => {
         const audio = new Audio('/sounds/alarm.mp3');
@@ -76,10 +91,10 @@ const SettingsModal = ({
                 <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
                     <div className="setting-section">
                         <div className="setting-label"><User size={14} /> Account</div>
-                        {user && user.email && !user.isGuest ? (
+                        {user && !user.isGuest ? (
                             <div style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                    <span style={{ fontWeight: 500 }}>{user.firstName || 'User'}</span>
+                                    <span style={{ fontWeight: 500 }}>{user.username || 'Member'}</span>
                                     <span style={{ fontSize: '0.8rem', color: 'var(--primary-color)' }}>Pro</span>
                                 </div>
                                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '15px' }}>{user.email}</p>
@@ -88,7 +103,11 @@ const SettingsModal = ({
                                 </button>
                             </div>
                         ) : (
-                            <AuthForm mode={authMode} onToggleMode={() => setAuthMode(prev => prev === 'login' ? 'register' : 'login')} />
+                            <AuthForm
+                                isLogin={authMode === 'login'}
+                                onSuccess={() => toast.success('Logged in successfully!')}
+                                toggleMode={() => setAuthMode(prev => prev === 'login' ? 'register' : 'login')}
+                            />
                         )}
                     </div>
 
@@ -96,8 +115,8 @@ const SettingsModal = ({
                         <div className="setting-label"><Clock size={14} /> Timer (min)</div>
                         <div className="time-grid">
                             <TimeInput label="Focus" value={timerSettings.work} onChange={(v) => onTimerChange({ ...timerSettings, work: v })} />
-                            <TimeInput label="Short Break" value={timerSettings.short} onChange={(v) => onTimerChange({ ...timerSettings, short: v })} />
-                            <TimeInput label="Long Break" value={timerSettings.long} onChange={(v) => onTimerChange({ ...timerSettings, long: v })} />
+                            <TimeInput label="Short" value={timerSettings.short} onChange={(v) => onTimerChange({ ...timerSettings, short: v })} />
+                            <TimeInput label="Long" value={timerSettings.long} onChange={(v) => onTimerChange({ ...timerSettings, long: v })} />
                         </div>
                     </div>
 
@@ -129,6 +148,7 @@ const SettingsModal = ({
                         </div>
                     </div>
 
+                    {/* Sound Section */}
                     <div className="setting-section">
                         <div className="setting-label"><Volume2 size={14} /> Sound & Volume</div>
                         <div style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px' }}>
