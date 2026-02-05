@@ -4,13 +4,12 @@ export interface LoginDto {
 }
 
 export interface RegisterDto {
-    firstname: string;
-    lastname?: string;
+    firstName: string;
+    lastName?: string;
     email: string;
     password: string;
     deviceId?: string;
 }
-
 export interface GuestLoginDto {
     deviceId: string;
 }
