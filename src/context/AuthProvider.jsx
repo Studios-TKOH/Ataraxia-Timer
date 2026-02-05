@@ -93,8 +93,8 @@ export const AuthProvider = ({ children }) => {
     const register = async (userData) => {
         try {
             const data = await authService.register(userData);
-            const newToken = data.token || data.access_token;
-            const newUser = { ...(data.user || data), isGuest: false };
+            const newToken = data.access_token;
+            const newUser = { ...data.user, isGuest: false };
             saveSession(newToken, newUser);
             return { success: true };
         } catch (error) {
@@ -102,7 +102,6 @@ export const AuthProvider = ({ children }) => {
             return { success: false, error: message };
         }
     };
-
     return (
         <AuthContext.Provider value={{
             user, token, loading, initialized,

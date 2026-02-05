@@ -20,8 +20,7 @@ export interface AuthResponse {
     user: {
         id: string;
         email: string;
-        firstName: string;
-        lastName?: string;
-        isGuest?: boolean;
+        name: string;
+        isGuest: boolean;
     };
 }

@@ -3,13 +3,10 @@ import { LoginDto, RegisterDto, AuthResponse, GuestLoginDto } from '../dto/auth.
 
 export const authService = {
     login: async (data: LoginDto) => {
-        try {
-            const response = await apiClient.post<AuthResponse>('/auth/login', data);
-            return response.data;
-        } catch (error: any) {
-            const message = error.response?.data?.message || 'Login failed';
-            throw new Error(message);
-        }
+        const response = await apiClient.post<AuthResponse>('/auth/login', data, {
+            headers: { Authorization: undefined }
+        });
+        return response.data;
     },
 
     register: async (data: RegisterDto) => {
