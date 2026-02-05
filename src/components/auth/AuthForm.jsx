@@ -6,8 +6,10 @@ import { Loader2, Mail, Lock, User, ArrowRight } from 'lucide-react';
 const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [username, setUsername] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
     const { login, register } = useAuth();
 
     const handleSubmit = async (e) => {
@@ -19,7 +21,16 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
             if (isLogin) {
                 result = await login(email, password);
             } else {
-                result = await register({ email, password, username });
+                const deviceId = localStorage.getItem('device_id') || crypto.randomUUID();
+                if (!localStorage.getItem('device_id')) localStorage.setItem('device_id', deviceId);
+
+                result = await register({
+                    firstName,
+                    lastName,
+                    email,
+                    password,
+                    deviceId
+                });
             }
 
             if (result.success) {
@@ -36,23 +47,36 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
     };
 
     return (
-        <div className="auth-form-container">
-            <div className="auth-header">
-                <h2>{isLogin ? 'Sign In' : 'Create Account'}</h2>
-                <p>{isLogin ? 'Enter your credentials to continue' : 'Join Ataraxia and start your focus journey'}</p>
+        <div className="auth-container" style={{ padding: '10px 0' }}>
+            <div className="auth-header" style={{ marginBottom: '20px', textAlign: 'center' }}>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: '600', color: 'white' }}>
+                    {isLogin ? 'Sign In' : 'Join Ataraxia'}
+                </h2>
             </div>
 
-            <form onSubmit={handleSubmit} className="auth-form">
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {!isLogin && (
-                    <div className="input-group">
-                        <label>Username</label>
-                        <div className="input-wrapper">
-                            <User size={18} className="input-icon" />
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <div className="input-wrapper" style={{ position: 'relative', flex: 1 }}>
+                            <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <input
                                 type="text"
-                                placeholder="How should we call you?"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder="First Name"
+                                className="input-text"
+                                style={{ paddingLeft: '40px', width: '100%' }}
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                required={!isLogin}
+                            />
+                        </div>
+                        <div className="input-wrapper" style={{ flex: 1 }}>
+                            <input
+                                type="text"
+                                placeholder="Last Name"
+                                className="input-text"
+                                style={{ width: '100%' }}
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
                                 required={!isLogin}
                             />
                         </div>
@@ -60,12 +84,13 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
                 )}
 
                 <div className="input-group">
-                    <label>Email Address</label>
-                    <div className="input-wrapper">
-                        <Mail size={18} className="input-icon" />
+                    <div className="input-wrapper" style={{ position: 'relative' }}>
+                        <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                         <input
                             type="email"
-                            placeholder="name@example.com"
+                            placeholder="Email address"
+                            className="input-text"
+                            style={{ paddingLeft: '40px', width: '100%' }}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -74,12 +99,13 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
                 </div>
 
                 <div className="input-group">
-                    <label>Password</label>
-                    <div className="input-wrapper">
-                        <Lock size={18} className="input-icon" />
+                    <div className="input-wrapper" style={{ position: 'relative' }}>
+                        <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                         <input
                             type="password"
-                            placeholder="••••••••"
+                            placeholder="Password"
+                            className="input-text"
+                            style={{ paddingLeft: '40px', width: '100%' }}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
@@ -87,25 +113,20 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
                     </div>
                 </div>
 
-                <button type="submit" className="auth-submit-btn" disabled={isLoading}>
-                    {isLoading ? (
-                        <Loader2 className="animate-spin" size={20} />
-                    ) : (
+                <button type="submit" className="btn-save" disabled={isLoading} style={{ marginTop: '10px', width: '100%', justifyContent: 'center', background: 'var(--primary-color)', border: 'none' }}>
+                    {isLoading ? <Loader2 className="animate-spin" size={18} /> : (
                         <>
-                            {isLogin ? 'Sign In' : 'Sign Up'}
-                            <ArrowRight size={18} />
+                            {isLogin ? 'Sign In' : 'Create Account'}
+                            <ArrowRight size={16} style={{ marginLeft: '8px' }} />
                         </>
                     )}
                 </button>
             </form>
 
-            <div className="auth-footer">
-                <p>
-                    {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
-                    <button onClick={toggleMode} className="toggle-auth-btn">
-                        {isLogin ? 'Create one' : 'Sign in here'}
-                    </button>
-                </p>
+            <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.85rem' }}>
+                <button onClick={toggleMode} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: '500' }}>
+                    {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+                </button>
             </div>
         </div>
     );
