@@ -2,42 +2,49 @@ import React, { useEffect } from 'react';
 
 const AdBanner = () => {
     useEffect(() => {
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (e) {
-            console.error("AdSense error:", e);
-        }
+        const pushAd = () => {
+            try {
+                if (window.adsbygoogle) {
+                    (window.adsbygoogle = window.adsbygoogle || []).push({});
+                }
+            } catch (e) { }
+        };
+        const timer = setTimeout(pushAd, 1000);
+        return () => clearTimeout(timer);
     }, []);
 
     return (
-        <div className="silent-ad-wrapper">
-            <span className="ad-tag">Sponsor</span>
+        <div className="stealth-ad-container">
             <ins className="adsbygoogle"
-                style={{ display: 'block', textAlign: 'center' }}
-                data-ad-layout="in-article"
-                data-ad-format="fluid"
+                style={{ display: 'inline-block', width: '250px', height: '50px' }}
                 data-ad-client="ca-pub-1658820568225338"
                 data-ad-slot="2916462747"></ins>
 
             <style>{`
-                .silent-ad-wrapper {
-                    margin-top: 20px;
-                    padding: 10px;
-                    opacity: 0.4;
-                    transition: opacity 0.3s ease;
-                    border-radius: 12px;
-                    background: rgba(255, 255, 255, 0.02);
-                    border: 1px solid var(--glass-border);
-                    position: relative;
+                .stealth-ad-container {
+                    margin: 10px auto;
+                    width: 250px;
+                    height: 50px;
                     overflow: hidden;
-                    min-height: 80px;
+                    opacity: 0.05; 
+                    filter: grayscale(1);
+                    transition: all 0.5s ease;
+                    border-radius: 4px;
+                    position: relative;
                 }
-                .silent-ad-wrapper:hover { opacity: 1; }
-                .ad-tag {
-                    position: absolute; top: 2px; right: 8px;
-                    font-size: 0.6rem; color: var(--text-muted);
-                    text-transform: uppercase; pointer-events: none;
-                    z-index: 10;
+
+                .stealth-ad-container:hover {
+                    opacity: 0.6;
+                    filter: grayscale(0);
+                }
+
+                .stealth-ad-container::after {
+                    content: 'adv';
+                    position: absolute;
+                    bottom: 0;
+                    right: 2px;
+                    font-size: 8px;
+                    color: rgba(255,255,255,0.1);
                 }
             `}</style>
         </div>
