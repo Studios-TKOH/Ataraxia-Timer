@@ -28,7 +28,7 @@ export const AchievementProvider = ({ children }) => {
     }, [token, user]);
 
     useEffect(() => {
-        fetchAchievements();
+        // fetchAchievements();
     }, [fetchAchievements]);
 
     return (

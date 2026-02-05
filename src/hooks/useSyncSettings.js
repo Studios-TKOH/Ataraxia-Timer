@@ -1,48 +1,30 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { settingsService } from '../api/settings.service';
-import { tagsService } from '../api/tags.service';
 
 export const useSyncSettings = (user, token, isMaintenance, setters) => {
-    const { setTimerSettings, setLongBreakInterval, setAutoStart, setAccentColor } = setters;
+    const isFirstLoad = useRef(true);
+    const syncTimeout = useRef(null);
 
     useEffect(() => {
-        if (!token || !user || user.isGuest || isMaintenance) return;
+        if (!user || user.isGuest || !token || isMaintenance) return;
 
-        const syncSettings = async () => {
+        const sync = async () => {
             try {
-                const [settingsRes, tagsRes] = await Promise.allSettled([
-                    settingsService.getSettings(),
-                    tagsService.getAll()
-                ]);
-
-
-                if (settingsRes.status === 'fulfilled' && settingsRes.value) {
-                    const cloud = settingsRes.value;
-                    setTimerSettings(prev => ({
-                        ...prev,
-                        work: cloud.focusDuration || prev.work,
-                        short: cloud.shortBreakDuration || prev.short,
-                        long: cloud.longBreakDuration || prev.long
-                    }));
-
-                    if (cloud.longBreakInterval) setLongBreakInterval(cloud.longBreakInterval);
-
-                    const localAutoStart = localStorage.getItem('dw-autostart');
-                    if (cloud.autoStartPomodoros !== undefined && localAutoStart === null) {
-                        setAutoStart(cloud.autoStartPomodoros);
+                if (isFirstLoad.current) {
+                    const cloudSettings = await settingsService.getSettings();
+                    if (cloudSettings) {
+                        if (cloudSettings.timerSettings) setters.setTimerSettings(cloudSettings.timerSettings);
+                        if (cloudSettings.accentColor) setters.setAccentColor(cloudSettings.accentColor);
+                        if (cloudSettings.autoStart !== undefined) setters.setAutoStart(cloudSettings.autoStart);
+                        if (cloudSettings.longBreakInterval) setters.setLongBreakInterval(cloudSettings.longBreakInterval);
                     }
+                    isFirstLoad.current = false;
                 }
-
-                if (tagsRes.status === 'fulfilled' && tagsRes.value) {
-                    const focusTag = tagsRes.value.find(tag => tag.name === 'Focus');
-                    if (focusTag?.color) setAccentColor(focusTag.color);
-                }
-
-            } catch (err) {
-                console.warn("Cloud sync partial failure:", err.message);
+            } catch (error) {
+                console.error("Cloud sync failed:", error);
             }
         };
 
-        syncSettings();
-    }, [user, token, isMaintenance, setTimerSettings, setLongBreakInterval, setAutoStart, setAccentColor]);
+        sync();
+    }, [user?.id, token]);
 };
