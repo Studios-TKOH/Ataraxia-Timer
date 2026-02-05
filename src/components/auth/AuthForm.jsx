@@ -15,17 +15,24 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        const cleanEmail = email.trim().toLowerCase();
+        const cleanFirstName = firstName.trim();
+        const cleanLastName = lastName.trim();
 
         try {
             let result;
             if (isLogin) {
-                result = await login(email, password);
+                result = await login(cleanEmail, password);
             } else {
                 const deviceId = localStorage.getItem('device_id') || crypto.randomUUID();
+                if (!localStorage.getItem('device_id')) {
+                    localStorage.setItem('device_id', deviceId);
+                }
+
                 result = await register({
-                    firstName,
-                    lastName,
-                    email,
+                    firstName: cleanFirstName,
+                    lastName: cleanLastName,
+                    email: cleanEmail,
                     password,
                     deviceId
                 });
@@ -50,6 +57,9 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
                 <h2 style={{ fontSize: '1.2rem', fontWeight: '600', color: 'white' }}>
                     {isLogin ? 'Sign In' : 'Create Account'}
                 </h2>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    {isLogin ? 'Enter your credentials' : 'Join the focus journey'}
+                </p>
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -64,6 +74,7 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
                                 onChange={(e) => setFirstName(e.target.value)}
                                 required={!isLogin}
                                 autoComplete="given-name"
+                                style={{ width: '100%' }}
                             />
                         </div>
                         <div className="input-wrapper" style={{ flex: 1 }}>
@@ -75,6 +86,7 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
                                 onChange={(e) => setLastName(e.target.value)}
                                 required={!isLogin}
                                 autoComplete="family-name"
+                                style={{ width: '100%' }}
                             />
                         </div>
                     </div>
@@ -112,18 +124,42 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
                     </div>
                 </div>
 
-                <button type="submit" className="btn-save" disabled={isLoading} style={{ marginTop: '10px', width: '100%', justifyContent: 'center', background: 'var(--primary-color)', border: 'none' }}>
+                <button
+                    type="submit"
+                    className="btn-save"
+                    disabled={isLoading}
+                    style={{
+                        marginTop: '10px',
+                        width: '100%',
+                        justifyContent: 'center',
+                        background: 'var(--primary-color)',
+                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}
+                >
                     {isLoading ? <Loader2 className="animate-spin" size={18} /> : (
                         <>
                             {isLogin ? 'Sign In' : 'Sign Up'}
-                            <ArrowRight size={16} style={{ marginLeft: '8px' }} />
+                            <ArrowRight size={16} />
                         </>
                     )}
                 </button>
             </form>
 
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                <button onClick={toggleMode} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontSize: '0.85rem' }}>
+                <button
+                    onClick={toggleMode}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--primary-color)',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                        fontWeight: '500'
+                    }}
+                >
                     {isLogin ? "New to Ataraxia? Create account" : "Already have an account? Sign in"}
                 </button>
             </div>

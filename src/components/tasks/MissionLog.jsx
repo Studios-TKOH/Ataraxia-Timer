@@ -148,33 +148,58 @@ const MissionLog = ({ showAd }) => {
       <form onSubmit={addTask} style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', gap: '10px' }}>
           <input
-            type="text" placeholder="Estudiar NestJS..." value={newTaskTitle}
+            type="text"
+            placeholder="Add a new mission..."
+            value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
             disabled={loading}
             className="input-text"
-            style={{ background: 'rgba(0,0,0,0.2)', flex: 1 }}
+            style={{
+              background: 'rgba(0,0,0,0.2)',
+              flex: 1,
+              border: '1px solid rgba(255,255,255,0.05)'
+            }}
           />
-          <button type="submit" disabled={loading} className="btn-upload" style={{ background: 'var(--primary-color)', width: '45px', borderRadius: '12px' }}>
+
+          <input
+            type="text"
+            placeholder="# Tag"
+            value={newTaskTag}
+            onChange={(e) => setNewTaskTag(e.target.value)}
+            disabled={loading}
+            className="input-text"
+            style={{
+              background: 'rgba(0,0,0,0.2)',
+              width: '100px',
+              fontSize: '0.8rem',
+              textAlign: 'center',
+              border: newTaskTag ? '1px solid var(--primary-color)' : '1px solid rgba(255,255,255,0.05)',
+              transition: 'border-color 0.3s ease'
+            }}
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-upload"
+            style={{
+              background: 'var(--primary-color)',
+              width: '45px',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
             <Plus size={20} />
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', padding: '4px 0' }}>
-          {['General', 'Programación', 'Estudio', 'Diseño', 'Salud'].map(tag => (
-            <button
-              key={tag} type="button" onClick={() => setNewTaskTag(tag)}
-              style={{
-                padding: '4px 10px', borderRadius: '12px', fontSize: '0.7rem',
-                border: '1px solid',
-                borderColor: newTaskTag === tag ? 'var(--primary-color)' : 'rgba(255,255,255,0.1)',
-                background: newTaskTag === tag ? 'var(--primary-color)' : 'transparent',
-                color: 'white', cursor: 'pointer', transition: 'all 0.2s'
-              }}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
+        {newTaskTag && (
+          <div style={{ fontSize: '0.65rem', color: 'var(--primary-color)', paddingLeft: '5px', opacity: 0.8 }}>
+            New tag: #{newTaskTag}
+          </div>
+        )}
       </form>
 
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
