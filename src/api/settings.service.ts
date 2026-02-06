@@ -34,9 +34,9 @@ export const settingsService = {
         return response.data;
     },
 
-    updateSettings: async (id: string, data: UpdateSettingDto) => {
+    updateSettings: async (data: UpdateSettingDto) => {
         const response = await apiClient.patch<SettingResponse>(
-            `/settings/${id}`,
+            '/settings',
             data
         );
         return response.data;
@@ -47,7 +47,7 @@ export const settingsService = {
         const payload = sanitizeSettings(data);
 
         if (existing) {
-            return settingsService.updateSettings(existing.id, payload);
+            return settingsService.updateSettings(payload);
         }
 
         return settingsService.createSettings(payload);
