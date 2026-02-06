@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { X, Sun, Monitor, Upload, Volume2, Clock, User, LogOut, Save, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/auth-context';
 import { settingsService } from '../../api/settings.service';
+import { buildSettingsPayload } from '../../utils/buildSettingsPayload';
 import { tagsService } from '../../api/tags.service';
 import AuthForm from '../auth/AuthForm';
 import toast from 'react-hot-toast';
@@ -29,17 +30,13 @@ const SettingsModal = ({
     const saveSettings = async () => {
         if (!user || user.isGuest) return;
 
-        const payload = {
-            focusDuration: Number(timerSettings.work) || 25,
-            shortBreakDuration: Number(timerSettings.short) || 5,
-            longBreakDuration: Number(timerSettings.long) || 15,
-            autoStartBreaks: autoStart,
-            autoStartPomodoros: autoStart,
-            longBreakInterval: Number(longBreakInterval) || 4,
-            theme: accentColor,
-            soundEnabled: volume > 0,
-            platform: 'web'
-        };
+        const payload = buildSettingsPayload(
+            timerSettings,
+            autoStart,
+            longBreakInterval,
+            accentColor,
+            volume
+        );
 
         try {
             await settingsService.saveSettings(payload);
