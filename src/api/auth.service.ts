@@ -25,5 +25,12 @@ export const authService = {
             ...response.data,
             access_token: response.data.access_token
         };
+    },
+
+    refreshTokens: async (refreshToken: string) => {
+        const response = await apiClient.post<AuthResponse>('/auth/refresh', {}, {
+            headers: { Authorization: `Bearer ${refreshToken}` }
+        });
+        return response.data;
     }
 };
