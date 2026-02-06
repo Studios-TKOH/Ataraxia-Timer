@@ -85,7 +85,7 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
                         </div>
                         <input
                             type="text"
-                            placeholder="Last Name (Optional)"
+                            placeholder="Last Name"
                             className="input-text"
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
