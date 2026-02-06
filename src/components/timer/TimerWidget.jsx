@@ -6,7 +6,7 @@ import Controls from './Controls';
 const TimerWidget = ({
     mode, setMode,timeLeft,
     formatTime, isActive,
-    cycles, longBreakInterval,
+    cycles, longBreakInterval = 4,
     toggleTimer, resetTimer,
     togglePip, isPipActive,
     isInPipMode,timerSettings
@@ -59,7 +59,7 @@ const TimerWidget = ({
             </section>
         );
     }
-
+    const currentRound = (cycles % longBreakInterval) + 1;
     return (
         <section className="timer-section">
             <div className={`timer-controls-fade ${isActive ? 'hidden' : ''}`} style={{ marginBottom: '2rem', textAlign: 'center' }}>
@@ -78,7 +78,7 @@ const TimerWidget = ({
                     textAlign: 'center',
                     paddingTop: '1rem'
                 }}>
-                    ROUND {cycles % longBreakInterval + 1} / {longBreakInterval}
+                    ROUND {currentRound} / {longBreakInterval}
                 </div>
             )}
 
