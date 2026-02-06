@@ -44,10 +44,7 @@ export const AuthProvider = ({ children }) => {
                             id: 'auth-error',
                         });
                     }
-                    
-                    console.warn("Unauthorized access - logic logout initiated");
                     logout();
-
                     if (window.location.pathname !== '/') {
                         window.location.href = '/';
                     }
