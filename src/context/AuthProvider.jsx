@@ -35,10 +35,29 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        const handleAuthError = () => logout();
-        window.addEventListener('auth:logout', handleAuthError);
-        return () => window.removeEventListener('auth:logout', handleAuthError);
-    }, [logout]);
+        const interceptor = apiClient.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                if (error.response?.status === 401) {
+                    if (user && !user.isGuest) {
+                        toast.error("Session expired. Please sign in again.", {
+                            id: 'auth-error',
+                        });
+                    }
+                    
+                    console.warn("Unauthorized access - logic logout initiated");
+                    logout();
+
+                    if (window.location.pathname !== '/') {
+                        window.location.href = '/';
+                    }
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        return () => apiClient.interceptors.response.eject(interceptor);
+    }, [logout,user]);
 
     const saveSession = (newToken, newUser, newRefreshToken) => {
         setToken(newToken);
