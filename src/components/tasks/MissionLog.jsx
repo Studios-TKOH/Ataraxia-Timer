@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, CheckCircle2, Circle, GripVertical, Loader2, Tag as TagIcon } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Circle, Loader2, Tag as TagIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { tasksService } from '../../api/tasks.service';
+import { tagsService } from '../../api/tags.service';
 import { useAuth } from '../../context/auth-context';
 import { useAchievements } from '../../context/achievement-context';
 import AdBanner from '../layout/AdBanner';
 
 const MissionLog = ({ showAd }) => {
   const [tasks, setTasks] = useState([]);
+  const [tags, setTags] = useState([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskTag, setNewTaskTag] = useState('General');
+  const [newTaskTagColor, setNewTaskTagColor] = useState('#8b5cf6');
   const [loading, setLoading] = useState(false);
 
   const [editingTaskId, setEditingTaskId] = useState(null);
@@ -20,57 +23,18 @@ const MissionLog = ({ showAd }) => {
   const { refreshAchievements } = useAchievements();
 
   const TITLE_REGEX = /^[a-zA-Z0-9\s\-_.,!?áéíóúÁÉÍÓÚñÑ]+$/;
-  const TAG_REGEX = /^[a-zA-Z0-9\s\-_]+$/;
 
-  useEffect(() => {
-    if (editingTaskId && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [editingTaskId]);
-
-  const startEditing = (task) => {
-    setEditingTaskId(task.id);
-    setEditingText(task.title);
-  };
-
-  const saveEdit = async (id) => {
-    const currentTask = tasks.find(t => t.id === id);
-    if (editingText === currentTask.title) {
-      setEditingTaskId(null);
-      return;
-    }
-
-    if (!editingText.trim()) {
-      toast.error("The title cannot be empty");
-      setEditingTaskId(null);
-      return;
-    }
-
-    if (!TITLE_REGEX.test(editingText)) {
-      toast.error("Title contains invalid characters");
-      return;
-    }
-
-    const oldTasks = [...tasks];
-    setTasks(tasks.map(t => t.id === id ? { ...t, title: editingText } : t));
-    setEditingTaskId(null);
-
-    try {
-      await tasksService.update(id, { title: editingText });
-      toast.success('Mission updated', { icon: '✏️' });
-    } catch (error) {
-      toast.error("Failed to sync with server");
-      setTasks(oldTasks);
-    }
-  };
-
-  const loadTasks = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const data = await tasksService.getAll();
-      setTasks(data || []);
+      const [tasksData, tagsData] = await Promise.all([
+        tasksService.getAll(),
+        tagsService.getAll()
+      ]);
+      setTasks(tasksData || []);
+      setTags(tagsData || []);
     } catch (error) {
-      setTasks([]);
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -78,7 +42,7 @@ const MissionLog = ({ showAd }) => {
 
   useEffect(() => {
     if (initialized && token && !user?.isGuest) {
-      loadTasks();
+      loadData();
     }
   }, [initialized, token, user]);
 
@@ -91,18 +55,36 @@ const MissionLog = ({ showAd }) => {
     }
 
     try {
+      const existingTag = tags.find(t => t.name.toLowerCase() === newTaskTag.toLowerCase());
+
+      if (!existingTag) {
+        const createdTag = await tagsService.create({
+          name: newTaskTag,
+          color: newTaskTagColor
+        });
+        setTags([...tags, createdTag]);
+      } else if (existingTag.color !== newTaskTagColor) {
+        await tagsService.update(existingTag.id, { color: newTaskTagColor });
+        setTags(tags.map(t => t.id === existingTag.id ? { ...t, color: newTaskTagColor } : t));
+      }
+
       const savedTask = await tasksService.create({
         title: newTaskTitle,
         tag: newTaskTag
       });
+
       setTasks([...tasks, savedTask]);
       setNewTaskTitle('');
-      toast.success('Nueva misión asignada! 🚀');
+      toast.success('¡Misión asignada! 🚀');
       refreshAchievements();
     } catch (error) {
-      const message = error.response?.data?.message || "Error al crear la tarea";
-      toast.error(Array.isArray(message) ? message[0] : message);
+      toast.error("Error al sincronizar");
     }
+  };
+
+  const getTagColor = (tagName) => {
+    const foundTag = tags.find(t => t.name === tagName);
+    return foundTag?.color || 'var(--primary-color)';
   };
 
   const toggleTask = async (task) => {
@@ -114,7 +96,7 @@ const MissionLog = ({ showAd }) => {
         refreshAchievements();
       }
     } catch (error) {
-      toast.error("Error al actualizar estado");
+      toast.error("Error al actualizar");
     }
   };
 
@@ -129,6 +111,21 @@ const MissionLog = ({ showAd }) => {
     }
   };
 
+  const saveEdit = async (id) => {
+    const currentTask = tasks.find(t => t.id === id);
+    if (editingText === currentTask.title || !editingText.trim()) {
+      setEditingTaskId(null);
+      return;
+    }
+    try {
+      await tasksService.update(id, { title: editingText });
+      setTasks(tasks.map(t => t.id === id ? { ...t, title: editingText } : t));
+    } catch (error) {
+      toast.error("Error al editar");
+    }
+    setEditingTaskId(null);
+  };
+
   return (
     <div className="mission-log-container" style={{
       background: 'rgba(255,255,255,0.03)',
@@ -140,77 +137,50 @@ const MissionLog = ({ showAd }) => {
       flexDirection: 'column',
       backdropFilter: 'blur(10px)'
     }}>
-      <h3 style={{ marginBottom: '1.5rem', fontSize: '0.9rem', letterSpacing: '2px', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
+      <h3 style={{ marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
         Mission Log
         <span>{loading ? '...' : `${tasks.filter(t => t.completed).length}/${tasks.length}`}</span>
       </h3>
 
-      <form onSubmit={addTask} style={{ marginBottom: '1.5rem' }}>
-        <div style={{
-          display: 'flex',
-          background: 'rgba(0,0,0,0.2)',
-          padding: '4px',
-          borderRadius: '16px',
-          border: '1px solid var(--glass-border)',
-          gap: '8px'
-        }}>
+      <form onSubmit={addTask} style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '16px', border: '1px solid var(--glass-border)', gap: '8px' }}>
           <input
             type="text"
             placeholder="Add a new mission..."
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
-            disabled={loading}
             className="input-text"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              flex: 1,
-              padding: '10px 15px',
-              fontSize: '0.9rem'
-            }}
+            style={{ background: 'transparent', border: 'none', flex: 1, padding: '10px 15px' }}
           />
+          <button type="submit" disabled={loading} className="btn-save" style={{ width: '40px', height: '40px', borderRadius: '12px', justifyContent: 'center' }}>
+            {loading ? <Loader2 size={18} className="animate-spin" /> : <Plus size={20} />}
+          </button>
+        </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '0 8px' }}>
-            <span style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '0.8rem' }}>#</span>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '0 12px', border: '1px solid var(--glass-border)' }}>
+            <TagIcon size={14} style={{ color: newTaskTagColor, marginRight: '8px' }} />
             <input
               type="text"
-              placeholder="Tag"
+              placeholder="Tag name"
               value={newTaskTag}
-              onChange={(e) => setNewTaskTag(e.target.value)}
-              disabled={loading}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'white',
-                width: '70px',
-                fontSize: '0.75rem',
-                outline: 'none',
-                padding: '5px'
+              onChange={(e) => {
+                setNewTaskTag(e.target.value);
+                const match = tags.find(t => t.name.toLowerCase() === e.target.value.toLowerCase());
+                if (match) setNewTaskTagColor(match.color);
               }}
+              style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '0.8rem', padding: '8px 0', outline: 'none', flex: 1 }}
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              background: 'var(--primary-color)',
-              border: 'none',
-              color: 'white',
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'transform 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            {loading ? <Loader2 size={18} className="animate-spin" /> : <Plus size={20} />}
-          </button>
+          <div style={{ position: 'relative', width: '36px', height: '36px', borderRadius: '10px', border: '2px solid white', backgroundColor: newTaskTagColor, cursor: 'pointer', overflow: 'hidden' }}>
+            <input
+              type="color"
+              value={newTaskTagColor}
+              onChange={(e) => setNewTaskTagColor(e.target.value)}
+              style={{ position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%', cursor: 'pointer', opacity: 0 }}
+            />
+          </div>
         </div>
       </form>
 
@@ -220,7 +190,6 @@ const MissionLog = ({ showAd }) => {
             display: 'flex', alignItems: 'center', gap: '12px',
             background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '12px',
             opacity: task.completed ? 0.6 : 1,
-            transition: 'border 0.2s',
             border: editingTaskId === task.id ? '1px solid var(--primary-color)' : '1px solid transparent'
           }}>
             <button onClick={() => toggleTask(task)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: task.completed ? 'var(--primary-color)' : 'var(--text-muted)' }}>
@@ -234,36 +203,17 @@ const MissionLog = ({ showAd }) => {
                   value={editingText}
                   onChange={(e) => setEditingText(e.target.value)}
                   onBlur={() => saveEdit(task.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') saveEdit(task.id);
-                    if (e.key === 'Escape') setEditingTaskId(null);
-                  }}
-                  style={{
-                    background: 'rgba(0,0,0,0.3)',
-                    border: 'none',
-                    borderRadius: '4px',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    outline: 'none',
-                    padding: '2px 0'
-                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && saveEdit(task.id)}
+                  style={{ background: 'rgba(0,0,0,0.3)', border: 'none', color: 'white', fontSize: '0.9rem', outline: 'none' }}
                 />
               ) : (
-                <span
-                  onDoubleClick={() => startEditing(task)}
-                  style={{
-                    fontSize: '0.9rem',
-                    color: 'white',
-                    textDecoration: task.completed ? 'line-through' : 'none',
-                    cursor: 'text'
-                  }}
-                >
+                <span onDoubleClick={() => { setEditingTaskId(task.id); setEditingText(task.title); }} style={{ fontSize: '0.9rem', color: 'white', textDecoration: task.completed ? 'line-through' : 'none', cursor: 'text' }}>
                   {task.title}
                 </span>
               )}
               {task.tag && (
-                <span style={{ fontSize: '0.7rem', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <TagIcon size={10} /> {task.tag}
+                <span style={{ fontSize: '0.65rem', color: getTagColor(task.tag), display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold', marginTop: '2px' }}>
+                  <TagIcon size={10} /> {task.tag.toUpperCase()}
                 </span>
               )}
             </div>
