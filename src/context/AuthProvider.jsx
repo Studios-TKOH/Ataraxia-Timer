@@ -76,6 +76,7 @@ export const AuthProvider = ({ children }) => {
             saveSession(data.access_token, data.user, data.refresh_token);
             return { success: true };
         } catch (error) {
+            console.error(error.message);
             return { success: false, error: error.message };
         }
     };
