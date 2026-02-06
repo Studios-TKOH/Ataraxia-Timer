@@ -11,8 +11,6 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const { login, register } = useAuth();
-    const fieldHeight = '46px';
-    const borderRadius = '12px';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -35,30 +33,42 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
             }
 
             if (result.success) {
-                toast.success(isLogin ? 'Welcome back!' : 'Account created!');
+                toast.success(isLogin ? 'Welcome back!' : 'Account created successfully!');
                 onSuccess?.();
             } else {
-                toast.error(result.error || 'Auth failed');
+                toast.error(result.error || 'Authentication failed');
             }
         } catch (error) {
-            toast.error('Connection error');
+            toast.error('Connection error with server');
         } finally {
             setIsLoading(false);
         }
     };
 
+    const inputBaseStyle = {
+        height: '48px',
+        borderRadius: '12px',
+        fontSize: '0.95rem'
+    };
+
     return (
-        <div className="auth-container" style={{ padding: '4px' }}>
-            <div className="auth-header" style={{ marginBottom: '32px', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white', marginBottom: '8px' }}>
+        <div className="auth-container" style={{ padding: '4px 0' }}>
+            <div className="auth-header" style={{ marginBottom: '28px', textAlign: 'center' }}>
+                <h2 style={{
+                    fontSize: '1.4rem',
+                    fontWeight: '700',
+                    color: 'white',
+                    marginBottom: '6px',
+                    letterSpacing: '-0.02em'
+                }}>
                     {isLogin ? 'Sign In' : 'Create Account'}
                 </h2>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                     {isLogin ? 'Enter your credentials' : 'Join the focus journey'}
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {!isLogin && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                         <div style={{ position: 'relative' }}>
@@ -70,41 +80,41 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
                                 required={!isLogin}
-                                style={{ ...inputBaseStyle, height: fieldHeight, paddingLeft: '42px' }}
+                                style={{ ...inputBaseStyle, paddingLeft: '44px' }}
                             />
                         </div>
                         <input
                             type="text"
-                            placeholder="Last Name"
+                            placeholder="Last Name (Optional)"
                             className="input-text"
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                             required={!isLogin}
-                            style={{ ...inputBaseStyle, height: fieldHeight }}
+                            style={inputBaseStyle}
                         />
                     </div>
                 )}
 
-                <div style={{ position: 'relative' }}>
+                <div className="input-group" style={{ position: 'relative' }}>
                     <Mail size={18} style={iconStyle} />
                     <input
                         type="email"
-                        placeholder="Email"
+                        placeholder="Email address"
                         className="input-text"
-                        style={{ ...inputBaseStyle, height: fieldHeight, paddingLeft: '42px' }}
+                        style={{ ...inputBaseStyle, paddingLeft: '44px' }}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
                 </div>
 
-                <div style={{ position: 'relative' }}>
+                <div className="input-group" style={{ position: 'relative' }}>
                     <Lock size={18} style={iconStyle} />
                     <input
                         type="password"
                         placeholder="Password"
                         className="input-text"
-                        style={{ ...inputBaseStyle, height: fieldHeight, paddingLeft: '42px' }}
+                        style={{ ...inputBaseStyle, paddingLeft: '44px' }}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
@@ -118,37 +128,44 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
                     style={{
                         marginTop: '10px',
                         width: '100%',
-                        height: '50px',
+                        height: '52px',
                         justifyContent: 'center',
-                        background: 'var(--primary-purple)',
+                        background: 'var(--primary-color)',
+                        boxShadow: '0 4px 15px var(--primary-glow)',
                         color: 'white',
-                        fontWeight: '600',
                         fontSize: '1rem',
-                        borderRadius: borderRadius,
+                        fontWeight: '600',
+                        borderRadius: '14px',
                         border: 'none',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '10px',
                         cursor: isLoading ? 'not-allowed' : 'pointer',
-                        boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
+                        transition: 'all 0.2s ease'
                     }}
                 >
-                    {isLoading ? <Loader2 className="animate-spin" size={22} /> : (
+                    {isLoading ? <Loader2 className="animate-spin" size={20} /> : (
                         <>
                             {isLogin ? 'Sign In' : 'Sign Up'}
-                            <ArrowRight size={20} />
+                            <ArrowRight size={18} />
                         </>
                     )}
                 </button>
             </form>
 
-            <div style={{ marginTop: '28px', textAlign: 'center' }}>
+            <div style={{ marginTop: '24px', textAlign: 'center' }}>
                 <button
                     onClick={toggleMode}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.875rem' }}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--text-muted)',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                    }}
                 >
                     {isLogin ? "New to Ataraxia? " : "Already have an account? "}
-                    <span style={{ color: 'var(--primary-purple)', fontWeight: '600' }}>
+                    <span style={{ color: 'var(--primary-color)', fontWeight: '600' }}>
                         {isLogin ? "Create account" : "Sign in"}
                     </span>
                 </button>
@@ -157,24 +174,14 @@ const AuthForm = ({ isLogin, onSuccess, toggleMode }) => {
     );
 };
 
-const inputBaseStyle = {
-    width: '100%',
-    borderRadius: '12px',
-    fontSize: '0.95rem',
-    background: 'rgba(255, 255, 255, 0.05)',
-    border: '1px solid var(--glass-border)',
-    color: 'white',
-    boxSizing: 'border-box'
-};
-
 const iconStyle = {
     position: 'absolute',
     left: '14px',
     top: '50%',
     transform: 'translateY(-50%)',
     color: 'var(--text-muted)',
-    zIndex: 1,
-    pointerEvents: 'none'
+    pointerEvents: 'none',
+    zIndex: 2
 };
 
 export default AuthForm;
