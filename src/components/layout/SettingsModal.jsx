@@ -122,7 +122,7 @@ const SettingsModal = ({
                         <div className="setting-row"><span>Auto-start Cycles</span><Switch checked={autoStart} onChange={() => onAutoStartChange(!autoStart)} /></div>
                         <div className="setting-row">
                             <span>Long Break Interval</span>
-                            <input type="number" min="1" max="10" value={longBreakInterval} onChange={(e) => onLongBreakIntervalChange(parseInt(e.target.value) || 1)} className="input-text-mini" />
+                            <input type="number" min="1" max="10" value={longBreakInterval} onChange={(e) => onLongBreakIntervalChange(parseInt(e.target.value) || 1,10)} className="input-text-mini" />
                         </div>
                         <div className="setting-row"><span>24-Hour Clock</span><Switch checked={is24Hour} onChange={() => onFormatChange(!is24Hour)} /></div>
                     </div>
@@ -181,11 +181,19 @@ const TimeInput = ({ label, value, onChange }) => {
         const val = e.target.value;
         if (val === '') { onChange(''); return; }
         const num = Number(val);
-        if (!Number.isNaN(num) && num >= 0) onChange(num);
+        if (!Number.isNaN(num)) {
+            let validatedVal = num;
+            if (label === "Focus") {
+                validatedVal = Math.max(1, Math.min(num, 120));
+            } else {
+                validatedVal = Math.max(1, num);
+            }
+            onChange(validatedVal);
+        }
     };
     return (
         <div className="time-box">
-            <input type="number" min="1" value={value} onChange={handleChange} onBlur={() => { if (value === '') onChange(1); }} className="input-text time-input" />
+            <input type="number" min="1" value={value} max={label === "Focus" ? "120" : undefined} onChange={handleChange} onBlur={() => { if (value === '') onChange(1); }} className="input-text time-input" />
             <label className="time-label">{label}</label>
         </div>
     );
