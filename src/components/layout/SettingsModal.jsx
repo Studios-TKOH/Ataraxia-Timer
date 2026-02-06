@@ -34,11 +34,13 @@ const SettingsModal = ({
             autoStart,
             longBreakInterval,
             accentColor,
-            volume
+            volume,
+            currentBg
         );
 
         try {
             await settingsService.saveSettings(payload);
+            toast.success('Settings & Background synced');
         } catch (err) {
             toast.error("Failed to sync settings");
         }
