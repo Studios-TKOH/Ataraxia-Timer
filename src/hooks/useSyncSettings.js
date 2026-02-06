@@ -3,7 +3,6 @@ import { settingsService } from '../api/settings.service';
 
 export const useSyncSettings = (user, token, isMaintenance, setters) => {
     const isFirstLoad = useRef(true);
-    const syncTimeout = useRef(null);
 
     useEffect(() => {
         if (!user || user.isGuest || !token || isMaintenance) return;
@@ -12,11 +11,21 @@ export const useSyncSettings = (user, token, isMaintenance, setters) => {
             try {
                 if (isFirstLoad.current) {
                     const cloudSettings = await settingsService.getSettings();
+
                     if (cloudSettings) {
-                        if (cloudSettings.timerSettings) setters.setTimerSettings(cloudSettings.timerSettings);
-                        if (cloudSettings.accentColor) setters.setAccentColor(cloudSettings.accentColor);
-                        if (cloudSettings.autoStart !== undefined) setters.setAutoStart(cloudSettings.autoStart);
-                        if (cloudSettings.longBreakInterval) setters.setLongBreakInterval(cloudSettings.longBreakInterval);
+                        setters.setTimerSettings({
+                            work: cloudSettings.focusDuration || 25,
+                            short: cloudSettings.shortBreakDuration || 5,
+                            long: cloudSettings.longBreakDuration || 15
+                        });
+
+                        if (cloudSettings.longBreakInterval) {
+                            setters.setLongBreakInterval(cloudSettings.longBreakInterval);
+                        }
+
+                        if (cloudSettings.autoStartPomodoros !== undefined) {
+                            setters.setAutoStart(cloudSettings.autoStartPomodoros);
+                        }
                     }
                     isFirstLoad.current = false;
                 }
@@ -26,5 +35,5 @@ export const useSyncSettings = (user, token, isMaintenance, setters) => {
         };
 
         sync();
-    }, [user?.id, token]);
+    }, [user?.id, token, setters, isMaintenance]);
 };
