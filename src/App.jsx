@@ -118,7 +118,7 @@ function App() {
 
                 <main className="main-layout">
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'center', opacity: pipWindow ? 0.3 : 1 }}>
-                    <TimerWidget {...timer} timerSettings={timerSettings} togglePip={togglePip} isPipActive={!!pipWindow} />
+                    <TimerWidget {...timer} longBreakInterval={longBreakInterval} timerSettings={timerSettings} togglePip={togglePip} isPipActive={!!pipWindow} />
                   </div>
                   <section className="tasks-section">
                     <MissionLog key={user?.id || 'guest'} showAd={!timer.isActive} />
