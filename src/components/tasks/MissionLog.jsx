@@ -145,8 +145,15 @@ const MissionLog = ({ showAd }) => {
         <span>{loading ? '...' : `${tasks.filter(t => t.completed).length}/${tasks.length}`}</span>
       </h3>
 
-      <form onSubmit={addTask} style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', gap: '10px' }}>
+      <form onSubmit={addTask} style={{ marginBottom: '1.5rem' }}>
+        <div style={{
+          display: 'flex',
+          background: 'rgba(0,0,0,0.2)',
+          padding: '4px',
+          borderRadius: '16px',
+          border: '1px solid var(--glass-border)',
+          gap: '8px'
+        }}>
           <input
             type="text"
             placeholder="Add a new mission..."
@@ -155,51 +162,56 @@ const MissionLog = ({ showAd }) => {
             disabled={loading}
             className="input-text"
             style={{
-              background: 'rgba(0,0,0,0.2)',
+              background: 'transparent',
+              border: 'none',
               flex: 1,
-              border: '1px solid rgba(255,255,255,0.05)'
+              padding: '10px 15px',
+              fontSize: '0.9rem'
             }}
           />
 
-          <input
-            type="text"
-            placeholder="# Tag"
-            value={newTaskTag}
-            onChange={(e) => setNewTaskTag(e.target.value)}
-            disabled={loading}
-            className="input-text"
-            style={{
-              background: 'rgba(0,0,0,0.2)',
-              width: '100px',
-              fontSize: '0.8rem',
-              textAlign: 'center',
-              border: newTaskTag ? '1px solid var(--primary-color)' : '1px solid rgba(255,255,255,0.05)',
-              transition: 'border-color 0.3s ease'
-            }}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '0 8px' }}>
+            <span style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '0.8rem' }}>#</span>
+            <input
+              type="text"
+              placeholder="Tag"
+              value={newTaskTag}
+              onChange={(e) => setNewTaskTag(e.target.value)}
+              disabled={loading}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'white',
+                width: '70px',
+                fontSize: '0.75rem',
+                outline: 'none',
+                padding: '5px'
+              }}
+            />
+          </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="btn-upload"
             style={{
               background: 'var(--primary-color)',
-              width: '45px',
+              border: 'none',
+              color: 'white',
+              width: '40px',
+              height: '40px',
               borderRadius: '12px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'transform 0.2s'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
-            <Plus size={20} />
+            {loading ? <Loader2 size={18} className="animate-spin" /> : <Plus size={20} />}
           </button>
         </div>
-
-        {newTaskTag && (
-          <div style={{ fontSize: '0.65rem', color: 'var(--primary-color)', paddingLeft: '5px', opacity: 0.8 }}>
-            New tag: #{newTaskTag}
-          </div>
-        )}
       </form>
 
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
