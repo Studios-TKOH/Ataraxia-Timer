@@ -1,36 +1,23 @@
 import { apiClient } from './client';
 import { LoginDto, RegisterDto, AuthResponse, GuestLoginDto } from '../dto/auth.types';
 
+const ENDPOINTS = {
+    LOGIN: '/auth/login',
+    REGISTER: '/auth/register',
+    GUEST: '/auth/guest-login',
+};
+
 export const authService = {
     login: async (data: LoginDto) => {
-        const response = await apiClient.post<AuthResponse>('/auth/login', data, {
-            headers: { Authorization: undefined }
-        });
+        const response = await apiClient.post<AuthResponse>(ENDPOINTS.LOGIN, data);
         return response.data;
     },
-
     register: async (data: RegisterDto) => {
-        try {
-            const response = await apiClient.post<AuthResponse>('/auth/register', data);
-            return response.data;
-        } catch (error: any) {
-            const message = error.response?.data?.message || 'Registration failed';
-            throw new Error(message);
-        }
+        const response = await apiClient.post<AuthResponse>(ENDPOINTS.REGISTER, data);
+        return response.data;
     },
-
     guestLogin: async (data: GuestLoginDto) => {
-        const response = await apiClient.post<AuthResponse>('/auth/guest-login', data);
-        return {
-            ...response.data,
-            access_token: response.data.access_token
-        };
-    },
-
-    refreshTokens: async (refreshToken: string) => {
-        const response = await apiClient.post<AuthResponse>('/auth/refresh', {}, {
-            headers: { Authorization: `Bearer ${refreshToken}` }
-        });
+        const response = await apiClient.post<AuthResponse>(ENDPOINTS.GUEST, data);
         return response.data;
     }
 };
