@@ -51,6 +51,7 @@ function App() {
     setAutoStart,
     setAccentColor
   }), [setTimerSettings, setLongBreakInterval, setAutoStart, setAccentColor]);
+
   useSyncSettings(user, token, isMaintenance, syncSetters);
 
   useEffect(() => {
@@ -63,7 +64,7 @@ function App() {
   }, [navigate]);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
+    const storedToken = localStorage.getItem('access_token');
     if (!loading && !user && !storedToken && !showIntro && !isMaintenance) {
       loginAsGuest().catch(() => setIsMaintenance(true));
     }
@@ -96,7 +97,11 @@ function App() {
           <Route path="/callback" element={<SpotifyCallback />} />
 
           <Route path="/*" element={
-            <div style={{ width: '100%', '--primary-color': accentColor, '--primary-glow': `${accentColor}80` }}>
+            <div style={{
+              width: '100%',
+              '--primary-color': accentColor,
+              '--primary-glow': `${accentColor}80`
+            }}>
               <div className="background-layer" style={{ backgroundImage: bgImage ? `url(${bgImage})` : undefined }} />
               <div className="background-overlay" />
 
@@ -112,13 +117,19 @@ function App() {
               <MusicWidget />
 
               <div className="app-wrapper">
-                <div className={`header-container ${timer.isActive ? 'hidden' : ''}`}>
+                <header className={`header-container ${timer.isActive ? 'hidden' : ''}`}>
                   <Header is24Hour={is24Hour} />
-                </div>
+                </header>
 
                 <main className="main-layout">
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'center', opacity: pipWindow ? 0.3 : 1 }}>
-                    <TimerWidget {...timer} longBreakInterval={longBreakInterval} timerSettings={timerSettings} togglePip={togglePip} isPipActive={!!pipWindow} />
+                    <TimerWidget
+                      {...timer}
+                      longBreakInterval={longBreakInterval}
+                      timerSettings={timerSettings}
+                      togglePip={togglePip}
+                      isPipActive={!!pipWindow}
+                    />
                   </div>
                   <section className="tasks-section">
                     <MissionLog key={user?.id || 'guest'} showAd={!timer.isActive} />
@@ -127,21 +138,33 @@ function App() {
 
                 <LeftDock isActive={timer.isActive} />
                 <RightDock
-                  isActive={timer.isActive} volume={volume} setVolume={setVolume}
-                  toggleMute={toggleMute} setIsSettingsOpen={setIsSettingsOpen}
-                  setIsSupportOpen={setIsSupportOpen} toggleFullScreen={toggleFullScreen}
+                  isActive={timer.isActive}
+                  volume={volume}
+                  setVolume={setVolume}
+                  toggleMute={toggleMute}
+                  setIsSettingsOpen={setIsSettingsOpen}
+                  setIsSupportOpen={setIsSupportOpen}
+                  toggleFullScreen={toggleFullScreen}
                 />
               </div>
 
               <SettingsModal
-                isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)}
-                currentBg={bgImage} onBgChange={setBgImage}
-                accentColor={accentColor} onColorChange={setAccentColor}
-                timerSettings={timerSettings} onTimerChange={setTimerSettings}
-                autoStart={autoStart} onAutoStartChange={setAutoStart}
-                longBreakInterval={longBreakInterval} onLongBreakIntervalChange={setLongBreakInterval}
-                is24Hour={is24Hour} onFormatChange={setIs24Hour}
-                volume={volume} onVolumeChange={setVolume}
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                currentBg={bgImage}
+                onBgChange={setBgImage}
+                accentColor={accentColor}
+                onColorChange={setAccentColor}
+                timerSettings={timerSettings}
+                onTimerChange={setTimerSettings}
+                autoStart={autoStart}
+                onAutoStartChange={setAutoStart}
+                longBreakInterval={longBreakInterval}
+                onLongBreakIntervalChange={setLongBreakInterval}
+                is24Hour={is24Hour}
+                onFormatChange={setIs24Hour}
+                volume={volume}
+                onVolumeChange={setVolume}
               />
               <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
             </div>
