@@ -1,7 +1,9 @@
 import { apiClient } from './client';
 import { CreateSettingDto, UpdateSettingDto, SettingResponse } from '../dto/settings.types';
 
-const sanitizeSettings = (data: CreateSettingDto) => {
+const SETTINGS_ENDPOINT = '/settings';
+
+const sanitizeSettings = (data: CreateSettingDto): Partial<CreateSettingDto> => {
     const clean: Partial<CreateSettingDto> = {};
 
     Object.entries(data).forEach(([key, value]) => {
@@ -16,7 +18,7 @@ const sanitizeSettings = (data: CreateSettingDto) => {
 export const settingsService = {
     getSettings: async () => {
         try {
-            const response = await apiClient.get<SettingResponse>('/settings');
+            const response = await apiClient.get<SettingResponse>(SETTINGS_ENDPOINT);
             return response.data;
         } catch (error: any) {
             if (error.response?.status === 404) {
@@ -27,18 +29,12 @@ export const settingsService = {
     },
 
     createSettings: async (data: CreateSettingDto) => {
-        const response = await apiClient.post<SettingResponse>(
-            '/settings',
-            data
-        );
+        const response = await apiClient.post<SettingResponse>(SETTINGS_ENDPOINT, data);
         return response.data;
     },
 
     updateSettings: async (data: UpdateSettingDto) => {
-        const response = await apiClient.patch<SettingResponse>(
-            '/settings',
-            data
-        );
+        const response = await apiClient.patch<SettingResponse>(SETTINGS_ENDPOINT, data);
         return response.data;
     },
 
@@ -50,6 +46,6 @@ export const settingsService = {
             return settingsService.updateSettings(payload);
         }
 
-        return settingsService.createSettings(payload);
+        return settingsService.createSettings(payload as CreateSettingDto);
     }
 };
