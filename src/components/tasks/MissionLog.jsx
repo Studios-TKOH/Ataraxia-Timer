@@ -24,7 +24,6 @@ const MissionLog = ({ showAd }) => {
   const [newTaskTag, setNewTaskTag] = useState('General');
   const [newTaskTagColor, setNewTaskTagColor] = useState('#8b5cf6');
   const [loading, setLoading] = useState(false);
-
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editingText, setEditingText] = useState('');
   const inputRef = useRef(null);
@@ -35,12 +34,8 @@ const MissionLog = ({ showAd }) => {
   const TITLE_REGEX = /^[a-zA-Z0-9\s\-_.,!?áéíóúÁÉÍÓÚñÑ]+$/;
 
   const loadData = async () => {
-    const currentToken = localStorage.getItem('access_token');
-    if (!currentToken || currentToken.startsWith('offline_token_') || user?.isGuest) {
-      setLoading(false);
-      return;
-    }
-
+    if (!token && !user) return; 
+    
     setLoading(true);
     try {
       const [tasksData, tagsData] = await Promise.all([
@@ -50,10 +45,9 @@ const MissionLog = ({ showAd }) => {
       setTasks(tasksData || []);
       setTags(tagsData || []);
     } catch (error) {
-      if (error.isOfflineToken) return;
-      console.error(error);
+      console.error("Error loading missions", error);
     } finally {
-      setTimeout(() => setLoading(false), 600);
+      setLoading(false);
     }
   };
 
@@ -100,7 +94,7 @@ const MissionLog = ({ showAd }) => {
       setTasks(prev => prev.map(t => t.id === tempId ? result : t));
 
       if (result.isOffline) {
-        toast("Misión guardada localmente 📡", { id: 'offline-toast' });
+        toast("Locally stored mission", { id: 'offline-toast' });
       } else {
         toast.success('Mission assigned!');
       }
@@ -117,7 +111,7 @@ const MissionLog = ({ showAd }) => {
   };
 
   const toggleTask = async (task) => {
-    if (task.isOffline) return toast.error("Espera a la sincronización para completar");
+    if (task.isOffline) return toast.error("Wait for synchronization to complete");
 
     const originalTasks = [...tasks];
     setTasks(tasks.map(t => t.id === task.id ? { ...t, completed: !t.completed } : t));
@@ -154,7 +148,7 @@ const MissionLog = ({ showAd }) => {
   };
 
   const saveEdit = async (id, isOffline) => {
-    if (isOffline) return toast.error("No se pueden editar misiones offline");
+    if (isOffline) return toast.error("Cannot edit offline missions");
     const currentTask = tasks.find(t => t.id === id);
     if (editingText === currentTask.title || !editingText.trim()) {
       setEditingTaskId(null);
@@ -163,7 +157,7 @@ const MissionLog = ({ showAd }) => {
     try {
       await tasksService.update(id, { title: editingText });
       setTasks(tasks.map(t => t.id === id ? { ...t, title: editingText } : t));
-      toast.success('Mission updated', { icon: '✏️' });
+      toast.success('Mission updated');
     } catch (error) { toast.error("Edit failed"); }
     setEditingTaskId(null);
   };
