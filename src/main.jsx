@@ -5,10 +5,16 @@ import App from './App.jsx'
 import { AuthProvider } from './context/AuthProvider'
 import { registerSW } from 'virtual:pwa-register'
 
-registerSW({ 
+registerSW({
   immediate: true,
-  onRegistered(r) {
+  onRegistered() {
     console.log('PWA: Service Worker successfully registered');
+  },
+  onOfflineReady() {
+    console.log('PWA: App ready to work fully offline');
+  },
+  onNeedRefresh() {
+    console.log('PWA: New content available, refresh to update');
   },
   onRegisterError(error) {
     console.error('PWA: Error registering the Service Worker', error);
