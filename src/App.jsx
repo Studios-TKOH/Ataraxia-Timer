@@ -9,6 +9,7 @@ import { useAuth } from './context/auth-context';
 import { useSyncSettings } from './hooks/useSyncSettings';
 import { MusicProvider } from './context/music-context';
 import { AchievementProvider } from './context/achievement-context';
+import { syncManager } from './api/sync.manager';
 
 import Header from './components/layout/Header';
 import MissionLog from './components/tasks/MissionLog';
@@ -43,6 +44,8 @@ function App() {
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isMaintenance, setIsMaintenance] = useState(false);
 
+  const [authAttempted, setAuthAttempted] = useState(false);
+
   const timer = useTimer('work', timerSettings, autoStart, longBreakInterval, volume);
 
   const syncSetters = useMemo(() => ({
@@ -53,11 +56,20 @@ function App() {
   }), [setTimerSettings, setLongBreakInterval, setAutoStart, setAccentColor]);
 
   useSyncSettings(user, token, isMaintenance, syncSetters);
+  useEffect(() => {
+    if (navigator.onLine && !isMaintenance && user) {
+      const timer = setTimeout(() => syncManager.syncAll(), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isMaintenance, user]);
 
   useEffect(() => {
     const handleMaintenance = () => {
-      setIsMaintenance(true);
-      if (window.location.pathname !== '/maintenance') navigate('/maintenance');
+      const hasToken = localStorage.getItem('access_token');
+      if (!hasToken) {
+        setIsMaintenance(true);
+        if (window.location.pathname !== '/maintenance') navigate('/maintenance');
+      }
     };
     window.addEventListener('server:down', handleMaintenance);
     return () => window.removeEventListener('server:down', handleMaintenance);
@@ -65,15 +77,22 @@ function App() {
 
   useEffect(() => {
     const storedToken = localStorage.getItem('access_token');
-    if (!loading && !user && !storedToken && !showIntro && !isMaintenance) {
-      loginAsGuest().catch(() => setIsMaintenance(true));
+    if (
+      !loading && !user && !storedToken &&
+      !showIntro && !isMaintenance &&
+      navigator.onLine && !authAttempted
+    ) {
+      setAuthAttempted(true);
+      loginAsGuest().catch(() => {
+        setIsMaintenance(true);
+      });
     }
-  }, [loading, user, showIntro, isMaintenance, loginAsGuest]);
+  }, [loading, user, showIntro, isMaintenance, loginAsGuest, authAttempted]);
 
   const handleIntroComplete = async () => {
     sessionStorage.setItem('dw-intro-seen', 'true');
     setShowIntro(false);
-    if (!user && !isMaintenance) await loginAsGuest().catch(() => setIsMaintenance(true));
+    setAuthAttempted(false);
   };
 
   const toggleMute = () => setVolume(volume === 0 ? 0.5 : 0);
@@ -83,7 +102,7 @@ function App() {
   };
 
   if (loading) return <div style={{ background: '#050505', width: '100%', height: '100vh' }} />;
-  if (isMaintenance) return <MaintenancePage />;
+  if (isMaintenance && !localStorage.getItem('access_token')) return <MaintenancePage />;
 
   return (
     <AchievementProvider>
