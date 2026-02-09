@@ -18,7 +18,17 @@ const processQueue = (error: any, token: string | null = null) => {
 
 apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem('access_token');
-    if (token && config.headers) config.headers.Authorization = `Bearer ${token}`;
+
+    if (token && token.startsWith('offline_token_')) {
+        return Promise.reject({
+            isOfflineToken: true,
+            message: "Blocked request: Temporary token"
+        });
+    }
+
+    if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
 });
 
@@ -34,6 +44,8 @@ apiClient.interceptors.response.use(
         return response;
     },
     async (error) => {
+        if (error.isOfflineToken) return Promise.reject(error);
+
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
         if (!error.response || error.response.status >= 500) {
@@ -47,6 +59,7 @@ apiClient.interceptors.response.use(
 
         if (error.response?.status === 401 && !originalRequest._retry) {
             if (originalRequest.url?.includes('/auth/login')) return Promise.reject(error);
+
             if (isRefreshing) {
                 return new Promise((resolve, reject) => { failedQueue.push({ resolve, reject }); })
                     .then(token => {
@@ -54,8 +67,10 @@ apiClient.interceptors.response.use(
                         return apiClient(originalRequest);
                     });
             }
+
             originalRequest._retry = true;
             isRefreshing = true;
+
             try {
                 const refreshToken = localStorage.getItem('refresh_token');
                 const { data } = await refreshClient.post('/auth/refresh', {}, {
