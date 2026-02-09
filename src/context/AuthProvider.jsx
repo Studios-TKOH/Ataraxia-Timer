@@ -15,7 +15,10 @@ export const AuthProvider = ({ children }) => {
     });
 
     const [loading, setLoading] = useState(false);
-    const [initialized, setInitialized] = useState(true);
+    const [initialized, setInitialized] = useState(() => {
+        const t = localStorage.getItem('access_token');
+        return t ? !t.startsWith('offline_token_') : false;
+    });
 
     const logout = useCallback(() => {
         setUser(null);
@@ -24,6 +27,14 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('dw-user');
     }, []);
+
+    useEffect(() => {
+        if (token && token.startsWith('offline_token_')) {
+            setInitialized(false);
+        } else {
+            setInitialized(true);
+        }
+    }, [token]);
 
     useEffect(() => {
         const handleAuthLogout = () => {
