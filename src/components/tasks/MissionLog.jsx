@@ -35,7 +35,12 @@ const MissionLog = ({ showAd }) => {
   const TITLE_REGEX = /^[a-zA-Z0-9\s\-_.,!?áéíóúÁÉÍÓÚñÑ]+$/;
 
   const loadData = async () => {
-    if (!token || user?.isGuest) return;
+    const currentToken = localStorage.getItem('access_token');
+    if (!currentToken || currentToken.startsWith('offline_token_') || user?.isGuest) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const [tasksData, tagsData] = await Promise.all([
@@ -45,7 +50,8 @@ const MissionLog = ({ showAd }) => {
       setTasks(tasksData || []);
       setTags(tagsData || []);
     } catch (error) {
-      console.error("Offline or Server Error:", error);
+      if (error.isOfflineToken) return;
+      console.error(error);
     } finally {
       setTimeout(() => setLoading(false), 600);
     }
