@@ -1,79 +1,79 @@
 <p align="center">
-  <a href="https://endearing-blini-6a6b91.netlify.app/" target="_blank">
+  <a href="https://ataraxia-timer.onrender.com/" target="_blank">
     <img src="https://drive.google.com/uc?export=view&id=1TuT30CiBkinh85WuTvjKGKN47hCyCS0Z" width="300" alt="Studios TKOH Logo">
   </a>
 </p>
 
 # Ataraxia Timer
 
-**¡Hecho por Studios TKOH!**
+**Desarrollado por Studios TKOH**
 
-Un temporizador de productividad moderno y estético diseñado para el **Deep Work** (Trabajo Profundo). Ideal para streamers, desarrolladores y cualquiera que busque mantener el enfoque sin distracciones visuales.
+Centro de comando personal para la productividad. Un temporizador moderno diseñado para el trabajo profundo (Deep Work), estructurado con una arquitectura profesional de alto rendimiento.
 
 <p align="center">
   <a href="https://ataraxia-timer.onrender.com/" target="_blank">
-    <img src="https://github.com/VaCris/Ataraxia-Timer/blob/feature/pwa-offline-support/.codeviz/Diagram/Ataraxia.png" width="900" alt="Diagram Ataraxia">
+    <img src="https://github.com/VaCris/Ataraxia-Timer/blob/feature/pwa-offline-support/.codeviz/Diagram/Ataraxia.png?raw=true" width="900" alt="Diagrama de Arquitectura Ataraxia">
   </a>
 </p>
-  
+
+## Actualización: Ataraxia V2 (Offline y Sincronización)
+
+El núcleo de la aplicación ha sido reconstruido para ofrecer una experiencia robusta y confiable:
+
+* **Soporte Offline (PWA):** Instalable como aplicación nativa en dispositivos móviles y de escritorio. Funciona sin conexión a internet mediante el uso de Service Workers.
+* **Sincronización Inteligente:** Las tareas y configuraciones se sincronizan con la nube. En ausencia de conexión, los cambios se almacenan en una cola de salida (Outbox) y se procesan automáticamente al restablecerse el vínculo con el servidor.
+* **Interfaz Optimista:** La gestión del Mission Log es instantánea. La interfaz de usuario refleja los cambios de inmediato sin depender de la latencia del servidor.
+* **Persistencia de Estado:** Mediante la implementación de Redux Saga, el progreso del temporizador y las sesiones activas se mantienen íntegros ante recargas de página o cierres accidentales del navegador.
+
 ## Características
 
-* **Modos de Enfoque:** Temporizadores preconfigurados para *Focus* (Trabajo), *Short Break* (Descanso Corto) y *Long Break* (Descanso Largo).
-* **Modo "Sin Distracciones":** La interfaz se limpia automáticamente cuando el temporizador inicia, ocultando elementos innecesarios.
-* **Personalización Total:**
-    * **Temas:** Cambia el color de acento de toda la aplicación.
-    * **Fondos:** Sube tus propias imágenes o usa URLs para personalizar el fondo.
-    * **Tiempos:** Ajusta la duración de cada modo según tu flujo de trabajo.
-* **Mission Log:** Lista de tareas integrada para registrar tus objetivos de la sesión.
-* **Persistencia Local:** Tus configuraciones, tareas y colores se guardan automáticamente en el navegador.
-* **Alertas Sonoras:** Notificación de audio al finalizar el tiempo.
+* **Modos de Enfoque:** Ciclos configurables para Trabajo, Descanso Corto y Descanso Largo.
+* **Modo de Concentración:** Interfaz minimalista que oculta elementos secundarios durante los periodos de actividad.
+* **Personalización Avanzada:**
+    * **Temas:** Ajuste del color de acento global de la aplicación.
+    * **Fondos:** Soporte para imágenes locales y URLs personalizadas.
+* **Mission Log:** Sistema de gestión de objetivos con persistencia híbrida (Local/Nube).
+* **Alertas:** Notificaciones acústicas al concluir los intervalos de tiempo.
 
-## 🛠️ Tecnologías Usadas
+## Tecnologías Utilizadas
 
-* **[React 18](https://react.dev/)**: Core del frontend.
-* **[Vite](https://vitejs.dev/)**: Build tool y entorno de desarrollo rápido.
-* **[Lucide React](https://lucide.dev/)**: Iconografía moderna y ligera.
-* **Canvas Confetti**: Efectos visuales de celebración.
-* **CSS3 & Glassmorphism**: Estilos modernos con efectos de desenfoque y transparencias.
+* **React 18 & Vite:** Entorno de desarrollo y ejecución de alta velocidad.
+* **Redux Toolkit:** Gestión centralizada del estado global.
+* **Redux Saga:** Control de efectos secundarios y lógica de sincronización offline.
+* **Vite PWA Plugin:** Gestión de manifiesto y estrategias de almacenamiento en caché.
+* **Lucide React & GSAP:** Iconografía técnica y animaciones de interfaz.
 
-## Instalación y Uso Local
+## Instalación y Ejecución Local
 
-Si quieres correr este proyecto en tu propia máquina:
-
-1.  **Clonar el repositorio:**
+1.  **Clonación del repositorio:**
     ```bash
-    git clone [https://github.com/TU_USUARIO/ataraxia-timer.git]
+    git clone [https://github.com/VaCris/Ataraxia-Timer.git](https://github.com/VaCris/Ataraxia-Timer.git)
     cd ataraxia-timer
     ```
 
-2.  **Instalar dependencias:**
+2.  **Instalación de dependencias:**
     ```bash
     npm install
     ```
 
-3.  **Correr el servidor de desarrollo:**
+3.  **Ejecución del entorno de desarrollo:**
     ```bash
     npm run dev
     ```
 
-4.  **Abrir en el navegador:**
-    Visita `http://localhost:5173` para ver la app.
+## Despliegue
 
-## Despliegue (Deploy)
+La aplicación está optimizada para su despliegue en la plataforma **Render**.
 
-Este proyecto está listo para ser desplegado en plataformas como **Render**, **Vercel** o **Netlify**.
-
-**Configuración de Build:**
-* **Build Command:** `npm run build`
-* **Publish Directory:** `dist`
-
-> **Nota:** Si despliegas en una subcarpeta (como GitHub Pages), recuerda ajustar el `base` en `vite.config.js`.
+**Configuración recomendada:**
+* **Comando de construcción:** `npm install; npm run build`
+* **Directorio de publicación:** `dist`
 
 ## Licencia
 
-Este proyecto es de código abierto y está disponible bajo la **Licencia MIT**.
+Este proyecto se distribuye bajo la **Licencia MIT**.
 
 <p align="center">
-  <sub>🛠️ Desarrollado con 💙 por <strong>Studios TKOH</strong></sub><br>
-  <a href="https://studios-tkoh.azurewebsites.net/" target="_blank">🌐 studios-tkoh.azurewebsites.net</a>
+  <sub>Desarrollado por <strong>Studios TKOH</strong></sub><br>
+  <a href="https://studios-tkoh.azurewebsites.net/" target="_blank">studios-tkoh.azurewebsites.net</a>
 </p>
