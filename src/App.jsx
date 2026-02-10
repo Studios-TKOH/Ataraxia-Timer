@@ -1,15 +1,14 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 
+import { fetchSettingsRequest } from './store/slices/settingsSlice';
 import { useTimer } from './hooks/useTimer';
-import useLocalStorage from './hooks/useLocalStorage';
 import { usePip } from './hooks/usePip';
 import { useAuth } from './context/auth-context';
-import { useSyncSettings } from './hooks/useSyncSettings';
 import { MusicProvider } from './context/music-context';
 import { AchievementProvider } from './context/achievement-context';
-import { syncManager } from './api/sync.manager';
 
 import Header from './components/layout/Header';
 import MissionLog from './components/tasks/MissionLog';
@@ -27,91 +26,30 @@ import MaintenancePage from './components/layout/MaintenancePage';
 import './styles/global.css';
 
 function App() {
-  const { user, token, loginAsGuest, logout, loading } = useAuth();
-  const { pipWindow, togglePip } = usePip();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const {
+    timerSettings, autoStart, longBreakInterval,
+    accentColor, bgImage, is24Hour, volume,
+    initialized: settingsInitialized,
+    loading: settingsLoading
+  } = useSelector(state => state.settings);
 
-  const [bgImage, setBgImage] = useLocalStorage('dw-background', '');
-  const [accentColor, setAccentColor] = useLocalStorage('dw-color', '#8b5cf6');
-  const [timerSettings, setTimerSettings] = useLocalStorage('dw-times', { work: 25, short: 5, long: 15 });
-  const [autoStart, setAutoStart] = useLocalStorage('dw-autostart', false);
-  const [longBreakInterval, setLongBreakInterval] = useLocalStorage('dw-interval', 4);
-  const [is24Hour, setIs24Hour] = useLocalStorage('dw-is24hour', false);
-  const [volume, setVolume] = useLocalStorage('dw-volume', 0.5);
-
+  const { user, token, loginAsGuest, loading: authLoading } = useAuth();
+  const { pipWindow, togglePip } = usePip();
   const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem('dw-intro-seen'));
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isMaintenance, setIsMaintenance] = useState(false);
-
   const [authAttempted, setAuthAttempted] = useState(false);
 
-  const timer = useTimer('work', timerSettings, autoStart, longBreakInterval, volume);
-
-  const syncSetters = useMemo(() => ({
-    setTimerSettings,
-    setLongBreakInterval,
-    setAutoStart,
-    setAccentColor
-  }), [setTimerSettings, setLongBreakInterval, setAutoStart, setAccentColor]);
-
-  useSyncSettings(user, token, isMaintenance, syncSetters);
-
   useEffect(() => {
-    let pollingInterval;
-
-    const waitForServerAndMigrate = async () => {
-      const storedToken = localStorage.getItem('access_token');
-
-      if (navigator.onLine && storedToken?.startsWith('offline_token_')) {
-        try {
-          const apiUrl = import.meta.env.VITE_API_URL;
-          await fetch(`${apiUrl}/tags`, {
-            method: 'HEAD',
-            cache: 'no-store'
-          });
-
-          if (pollingInterval) clearInterval(pollingInterval);
-
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('user_data');
-          localStorage.removeItem('refresh_token');
-
-          logout();
-          setAuthAttempted(false);
-
-        } catch (error) {
-        }
-      }
-    };
-
-    const handleConnectionChange = () => {
-      if (navigator.onLine) {
-        waitForServerAndMigrate();
-        pollingInterval = setInterval(waitForServerAndMigrate, 5000);
-      } else {
-        if (pollingInterval) clearInterval(pollingInterval);
-      }
-    };
-
-    window.addEventListener('online', handleConnectionChange);
-    window.addEventListener('offline', () => clearInterval(pollingInterval));
-
-    if (navigator.onLine) handleConnectionChange();
-
-    return () => {
-      window.removeEventListener('online', handleConnectionChange);
-      window.removeEventListener('offline', () => clearInterval(pollingInterval));
-      if (pollingInterval) clearInterval(pollingInterval);
-    };
-  }, [logout]);
-
-  useEffect(() => {
-    if (navigator.onLine && !isMaintenance && user) {
-      const timer = setTimeout(() => syncManager.syncAll(), 2000);
-      return () => clearTimeout(timer);
+    if (!settingsInitialized && !settingsLoading) {
+      dispatch(fetchSettingsRequest());
     }
-  }, [isMaintenance, user]);
+  }, [dispatch, settingsInitialized, settingsLoading]);
+
+  const timer = useTimer('work', timerSettings, autoStart, longBreakInterval, volume);
 
   useEffect(() => {
     const handleMaintenance = () => {
@@ -127,18 +65,11 @@ function App() {
 
   useEffect(() => {
     const storedToken = localStorage.getItem('access_token');
-
-    if (
-      !loading && !user && !storedToken &&
-      !showIntro && !isMaintenance &&
-      navigator.onLine && !authAttempted
-    ) {
+    if (!authLoading && !user && !storedToken && !showIntro && !isMaintenance && !authAttempted) {
       setAuthAttempted(true);
-      loginAsGuest().catch(() => {
-        setIsMaintenance(true);
-      });
+      loginAsGuest().catch(() => { });
     }
-  }, [loading, user, showIntro, isMaintenance, loginAsGuest, authAttempted]);
+  }, [authLoading, user, showIntro, isMaintenance, loginAsGuest, authAttempted]);
 
   const handleIntroComplete = async () => {
     sessionStorage.setItem('dw-intro-seen', 'true');
@@ -146,13 +77,21 @@ function App() {
     setAuthAttempted(false);
   };
 
-  const toggleMute = () => setVolume(volume === 0 ? 0.5 : 0);
+  const toggleMute = () => {
+    const newVol = volume === 0 ? 0.5 : 0;
+    dispatch({ type: 'settings/updateSettings', payload: { volume: newVol } });
+  };
+
+  const setVolumeHandler = (val) => {
+    dispatch({ type: 'settings/updateSettings', payload: { volume: val } });
+  };
+
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen();
     else if (document.exitFullscreen) document.exitFullscreen();
   };
 
-  if (loading) return <div style={{ background: '#050505', width: '100%', height: '100vh' }} />;
+  if (authLoading && !user) return <div style={{ background: '#050505', width: '100%', height: '100vh' }} />;
   if (isMaintenance && !localStorage.getItem('access_token')) return <MaintenancePage />;
 
   return (
@@ -207,10 +146,11 @@ function App() {
                 </main>
 
                 <LeftDock isActive={timer.isActive} />
+
                 <RightDock
                   isActive={timer.isActive}
                   volume={volume}
-                  setVolume={setVolume}
+                  setVolume={setVolumeHandler}
                   toggleMute={toggleMute}
                   setIsSettingsOpen={setIsSettingsOpen}
                   setIsSupportOpen={setIsSupportOpen}
@@ -221,21 +161,8 @@ function App() {
               <SettingsModal
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
-                currentBg={bgImage}
-                onBgChange={setBgImage}
-                accentColor={accentColor}
-                onColorChange={setAccentColor}
-                timerSettings={timerSettings}
-                onTimerChange={setTimerSettings}
-                autoStart={autoStart}
-                onAutoStartChange={setAutoStart}
-                longBreakInterval={longBreakInterval}
-                onLongBreakIntervalChange={setLongBreakInterval}
-                is24Hour={is24Hour}
-                onFormatChange={setIs24Hour}
-                volume={volume}
-                onVolumeChange={setVolume}
               />
+
               <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
             </div>
           } />
