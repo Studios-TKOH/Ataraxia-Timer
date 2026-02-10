@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'sounds/*.mp3'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'sounds/*.mp3'],
       manifest: {
         name: 'Ataraxia Timer',
         short_name: 'Ataraxia',
@@ -31,7 +31,9 @@ export default defineConfig({
         ]
       },
       workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3,jpg}'],
         navigateFallbackDenylist: [/^\/api/],
+        maximumFileSizeToCacheInBytes: 3000000,
       }
     })
   ],
