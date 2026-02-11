@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { X, ArrowRight, Link, Music, RotateCcw, LogIn, Check, Sparkles, User, Bookmark, Trash2, Play, AlertCircle } from 'lucide-react';
 import { loginWithSpotify, getSpotifyProfile, refreshAccessToken } from '../../api/spotify.service';
 import { useSpotifyPlayer } from '../../hooks/useSpotifyPlayer';
 import SpotifyPlayerUI from '../spotify/SpotifyPlayerUI';
 import { useMusic } from '../../context/music-context';
+import { setPlaying, updateTrackInfo } from '../../store/slices/musicSlice';
 
 const MusicWidget = () => {
+    const dispatch = useDispatch();
+    const { isPlaying } = useSelector(state => state.music);
     const {
         isModalOpen: isOpen,
         closeModal: onClose,
-        updateTrackInfo,
         playlistUrl: url,
         setPlaylistUrl: onUrlChange
     } = useMusic();
@@ -30,23 +33,27 @@ const MusicWidget = () => {
     const { currentTrack, isPaused, togglePlay, volume, setVolume, playContext, playTrack, deviceId } = spotifyPlayer;
 
     useEffect(() => {
+        dispatch(setPlaying(!isPaused));
+    }, [isPaused, dispatch]);
+
+    useEffect(() => {
         if (currentTrack) {
             const artist = currentTrack.artists ? currentTrack.artists[0].name : '';
-            updateTrackInfo({
+            dispatch(updateTrackInfo({
                 title: currentTrack.name,
                 artist: artist,
                 isPlaying: !isPaused
-            });
+            }));
         } else if (inputValue && !showInput && !isSpotifyContent) {
-            updateTrackInfo({
+            dispatch(updateTrackInfo({
                 title: "External Source",
                 artist: "Playing...",
                 isPlaying: true
-            });
+            }));
         } else {
-            updateTrackInfo(null);
+            dispatch(updateTrackInfo(null));
         }
-    }, [currentTrack, isPaused, inputValue, showInput, isSpotifyContent, updateTrackInfo]);
+    }, [currentTrack, isPaused, inputValue, showInput, isSpotifyContent, dispatch]);
 
     useEffect(() => {
         localStorage.setItem('dw-saved-playlists', JSON.stringify(savedPlaylists));
@@ -54,11 +61,8 @@ const MusicWidget = () => {
 
     useEffect(() => {
         if (url) setInputValue(url);
-
-        const embedUrl = getEmbedUrl(url);
         const isSpotify = url?.includes('spotify');
         setIsSpotifyContent(isSpotify);
-
         if (!inputValue && !url) setShowInput(true);
 
         const token = localStorage.getItem('spotify_access_token');
@@ -86,8 +90,6 @@ const MusicWidget = () => {
         return () => clearInterval(intervalId);
     }, [spotifyToken]);
 
-    const handleSpotifyLogin = () => loginWithSpotify();
-
     const getEmbedUrl = (inputUrl) => {
         if (!inputUrl) return null;
         try {
@@ -96,24 +98,16 @@ const MusicWidget = () => {
                 const [, type, id] = spotifyMatch;
                 return `https://open.spotify.com/embed/${type}/${id}`;
             }
-
             const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
             const ytMatch = inputUrl.match(ytRegex);
-
             if (ytMatch && ytMatch[1]) {
-                const videoId = ytMatch[1];
-                const origin = window.location.origin;
-                return `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&modestbranding=1&rel=0&origin=${origin}`;
+                return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=0&controls=1&modestbranding=1&rel=0&origin=${window.location.origin}`;
             }
-
             if (inputUrl.includes('soundcloud.com')) {
                 return `https://w.soundcloud.com/player/?url=${encodeURIComponent(inputUrl)}&auto_play=false`;
             }
-
             return null;
-        } catch {
-            return null;
-        }
+        } catch { return null; }
     };
 
     const identifyPlatform = (link) => {
@@ -220,7 +214,7 @@ const MusicWidget = () => {
                                 <div className="spotify-content">
                                     <div className="spotify-icon-bg"><LogIn size={16} color="#1db954" /></div>
                                     <div className="spotify-text"><span className="spotify-title">Connect Spotify</span><span className="spotify-desc">Unlock controls</span></div>
-                                    <button onClick={handleSpotifyLogin} className="btn-connect">Connect</button>
+                                    <button onClick={loginWithSpotify} className="btn-connect">Connect</button>
                                 </div>
                             ) : (
                                 <div className="spotify-content connected">
@@ -238,13 +232,16 @@ const MusicWidget = () => {
                     <div className="player-view">
                         {isSpotifyContent && spotifyToken && deviceId ? (
                             <SpotifyPlayerUI
-                                currentTrack={currentTrack} isPaused={isPaused} togglePlay={togglePlay} volume={volume} setVolume={setVolume}
+                                currentTrack={currentTrack}
+                                isPaused={!isPlaying}
+                                togglePlay={() => dispatch(setPlaying(!isPlaying))}
+                                volume={volume}
+                                setVolume={setVolume}
                             />
                         ) : embedUrl ? (
                             <iframe
                                 src={embedUrl} width="100%" height={embedUrl.includes('spotify') ? '152' : '220'} frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerPolicy="strict-origin-when-cross-origin" allowFullScreen
+                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                 style={{ borderRadius: '16px', background: '#000' }}
                             />
                         ) : null}
