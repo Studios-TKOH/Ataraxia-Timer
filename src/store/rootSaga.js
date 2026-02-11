@@ -4,6 +4,7 @@ import { syncSaga } from './sagas/syncSaga';
 import { timerSaga } from './sagas/timerSaga';
 import { tasksSaga } from './sagas/tasksSaga';
 import { settingsSaga } from './sagas/settingsSaga';
+import { musicSaga } from './sagas/musicSaga';
 
 export function* rootSaga() {
     yield all([
@@ -11,6 +12,7 @@ export function* rootSaga() {
         syncSaga(),
         timerSaga(),
         tasksSaga(),
-        settingsSaga()
+        settingsSaga(),
+        musicSaga()
     ]);
 }

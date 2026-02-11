@@ -3,6 +3,7 @@ import createSagaMiddleware from 'redux-saga';
 import authReducer from './slices/authSlice';
 import timerReducer from './slices/timerSlice';
 import tasksReducer from './slices/tasksSlice';
+import musicReducer from './slices/musicSlice';
 import settingsReducer from './slices/settingsSlice';
 
 import { rootSaga } from './rootSaga';
@@ -14,7 +15,8 @@ export const store = configureStore({
         auth: authReducer,
         timer: timerReducer,
         tasks: tasksReducer,
-        settings: settingsReducer
+        settings: settingsReducer,
+        music: musicReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({ thunk: false, serializableCheck: false }).concat(sagaMiddleware),
