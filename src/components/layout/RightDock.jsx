@@ -12,8 +12,7 @@ const RightDock = ({
     toggleFullScreen
 }) => {
     const handleAchievementsClick = (e) => {
-        toast('Achievements: Coming Soon! 🏆', {
-            icon: '🚀',
+        toast('Achievements: Coming Soon!', {
             style: {
                 borderRadius: '10px',
                 background: '#1a1a1a',
