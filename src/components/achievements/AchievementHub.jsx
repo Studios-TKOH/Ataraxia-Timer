@@ -1,68 +1,87 @@
-import React from 'react';
-import { useAchievements } from '../../context/achievement-context';
-import { Trophy, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Trophy, Users, Award, Lock, Loader2 } from 'lucide-react';
+import { fetchAchievementsRequest, fetchLeaderboardRequest } from '../../store/slices/achievementsSlice';
 
 const AchievementHub = () => {
-    const { achievements, loading } = useAchievements();
+    const [activeTab, setActiveTab] = useState('medals');
+    const dispatch = useDispatch();
+    const { list, unlockedIds, leaderboard, stats, loading } = useSelector(state => state.achievements);
+
+    useEffect(() => {
+        dispatch(fetchAchievementsRequest());
+        dispatch(fetchLeaderboardRequest());
+    }, [dispatch]);
 
     return (
-        <section className="achievements-section" aria-labelledby="achievements-title">
-            <h2 id="achievements-title" className="sr-only">Ataraxia Accomplishments</h2>
+        <div className="achievement-hub">
+            <div className="hub-stats">
+                <div className="stat-item">
+                    <span className="label">Streak</span>
+                    <span className="value">{stats.currentStreak} 🔥</span>
+                </div>
+                <div className="stat-item">
+                    <span className="label">Total XP</span>
+                    <span className="value">{stats.totalExperience}</span>
+                </div>
+            </div>
 
-            <div className="achievements-grid">
-                {achievements.map((item) => (
-                    <article
-                        key={item.id}
-                        className={`achievement-card ${item.isUnlocked ? 'unlocked' : 'locked'}`}
-                        itemScope itemType="https://schema.org/CreativeWork"
-                    >
-                        <div className="status-icon">
-                            {item.isUnlocked ? <Trophy size={20} color="var(--primary-purple)" /> : <Lock size={20} />}
-                        </div>
+            {/* Tab Selector */}
+            <div className="tabs-navigation">
+                <button
+                    className={activeTab === 'medals' ? 'active' : ''}
+                    onClick={() => setActiveTab('medals')}
+                >
+                    <Award size={18} /> My Medals
+                </button>
+                <button
+                    className={activeTab === 'ranking' ? 'active' : ''}
+                    onClick={() => setActiveTab('ranking')}
+                >
+                    <Users size={18} /> Ranking
+                </button>
+            </div>
 
-                        <div className="content">
-                            <h3 itemProp="name">{item.title}</h3>
-                            <p itemProp="description">{item.description}</p>
+            <div className="tab-content">
+                {loading && <Loader2 className="mx-auto my-4 animate-spin" />}
 
-                            {item.target > 1 && (
-                                <div className="progress-container">
-                                    <div
-                                        className="progress-bar"
-                                        style={{ width: `${(item.currentValue / item.target) * 100}%` }}
-                                    ></div>
-                                </div>
-                            )}
-                        </div>
-                    </article>
-                ))}
+                {activeTab === 'medals' ? (
+                    <div className="medals-grid">
+                        {list.map(ach => (
+                            <div key={ach.id} className={`medal-card ${unlockedIds.includes(ach.id) ? 'unlocked' : 'locked'}`}>
+                                {unlockedIds.includes(ach.id) ? <Award /> : <Lock />}
+                                <h4>{ach.name}</h4>
+                                <p>{ach.description}</p>
+                                <span className="points">+{ach.points} XP</span>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="ranking-list">
+                        {leaderboard.map((user) => (
+                            <div key={user.userId} className={`ranking-item rank-${user.rank}`}>
+                                <span className="position">#{user.rank}</span>
+                                <span className="username">{user.username}</span>
+                                <span className="xp">{user.experience} XP</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <style>{`
-                .achievements-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                    gap: 15px;
-                    padding: 20px;
-                }
-                .achievement-card {
-                    background: rgba(255, 255, 255, 0.03);
-                    border: 1px solid var(--glass-border);
-                    border-radius: 16px;
-                    padding: 16px;
-                    display: flex;
-                    gap: 12px;
-                    backdrop-filter: blur(10px);
-                }
-                .achievement-card.unlocked {
-                    border-color: var(--primary-purple);
-                    background: rgba(139, 92, 246, 0.05);
-                }
-                .achievement-card h3 { font-size: 0.95rem; margin: 0; color: white; }
-                .achievement-card p { font-size: 0.8rem; color: var(--text-muted); margin: 4px 0; }
-                .progress-container { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 8px; }
-                .progress-bar { height: 100%; background: var(--primary-purple); border-radius: 2px; transition: width 0.3s; }
-            `}</style>
-        </section>
+            .achievement-hub { background: #1a1a1a; border-radius: 12px; padding: 20px; color: white; }
+            .tabs-navigation { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+            .tabs-navigation button { background: none; border: none; color: #666; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+            .tabs-navigation button.active { color: #ffd700; font-weight: bold; }
+            .medals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+            .medal-card { padding: 15px; border-radius: 8px; text-align: center; background: #222; border: 1px solid #333; transition: transform 0.2s; }
+            .medal-card.locked { opacity: 0.5; filter: grayscale(1); }
+            .medal-card.unlocked { border-color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
+            .ranking-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; align-items: center; }
+            .rank-1 { color: #ffd700; font-weight: bold; }
+        `}</style>
+        </div>
     );
 };
 
