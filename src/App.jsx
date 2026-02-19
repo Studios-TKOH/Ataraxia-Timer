@@ -44,10 +44,10 @@ function App() {
   const [authAttempted, setAuthAttempted] = useState(false);
 
   useEffect(() => {
-    if (!settingsInitialized && !settingsLoading) {
+    if (user && !settingsInitialized && !settingsLoading) {
       dispatch(fetchSettingsRequest());
     }
-  }, [dispatch, settingsInitialized, settingsLoading]);
+  }, [dispatch, user, settingsInitialized]);
 
   const timer = useTimer('work', timerSettings, autoStart, longBreakInterval, volume);
 
