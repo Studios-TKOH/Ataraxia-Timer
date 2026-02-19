@@ -10,8 +10,8 @@ const playAlarm = (volume) => {
         const audio = new Audio('/sounds/alarm.mp3');
         audio.volume = volume;
         audio.play().catch(e => console.error("Audio play failed", e));
-    } catch (e) {
-        console.error("Audio error", e);
+    } catch (error) {
+        console.error({error:"Audio error"});
     }
 };
 
@@ -47,8 +47,9 @@ function* handleTimerComplete() {
             };
             yield call(timersService.saveSession, sessionData);
             yield put(incrementCycles());
+            window.dispatchEvent(new CustomEvent('timer:completed'));
         } catch (error) {
-            console.error("Failed to save session:", error);
+            console.error({error:"Error saving session data"});
         }
 
         const newCycles = cycles + 1;
