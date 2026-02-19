@@ -22,6 +22,7 @@ import LeftDock from './components/layout/LeftDock';
 import RightDock from './components/layout/RightDock';
 import PipPortal from './components/timer/PipPortal';
 import MaintenancePage from './components/layout/MaintenancePage';
+import AchievementHub from './components/achievements/AchievementHub';
 
 import './styles/global.css';
 
@@ -35,6 +36,7 @@ function App() {
     loading: settingsLoading
   } = useSelector(state => state.settings);
 
+  //const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
   const { user, token, loginAsGuest, loading: authLoading } = useAuth();
   const { pipWindow, togglePip } = usePip();
   const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem('dw-intro-seen'));
@@ -155,7 +157,16 @@ function App() {
                   setIsSettingsOpen={setIsSettingsOpen}
                   setIsSupportOpen={setIsSupportOpen}
                   toggleFullScreen={toggleFullScreen}
+                  //setIsAchievementsOpen={setIsAchievementsOpen}
                 />
+
+                {/* {isAchievementsOpen && (
+                  <div className="modal-overlay" onClick={() => setIsAchievementsOpen(false)}>
+                    <div onClick={e => e.stopPropagation()}>
+                      <AchievementHub />
+                    </div>
+                  </div>
+                )} */}
               </div>
 
               <SettingsModal
