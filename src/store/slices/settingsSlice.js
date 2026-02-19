@@ -40,6 +40,7 @@ const settingsSlice = createSlice({
         },
         fetchSettingsFailure: (state, action) => {
             state.loading = false;
+            state.initialized = true;
             state.error = action.payload;
         },
         updateSettings: (state, action) => {
