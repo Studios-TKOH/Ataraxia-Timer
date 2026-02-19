@@ -59,7 +59,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                         {user && !user.isGuest ? (
                             <div style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                    <span style={{ fontWeight: 500 }}>{user.name || 'Member'}</span>
+                                    <span style={{ fontWeight: 500 }}>{user.username || user.email?.split('@')[0]}</span>
                                     <span style={{ fontSize: '0.8rem', color: 'var(--primary-color)' }}>Pro</span>
                                 </div>
                                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '15px' }}>{user.email}</p>
