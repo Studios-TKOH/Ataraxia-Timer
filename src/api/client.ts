@@ -18,7 +18,7 @@ const processQueue = (error: any, token: string | null = null) => {
 
 apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem('access_token');
-    
+
     if (token && token.startsWith('offline_token_')) {
         const error: any = new Error("Offline Mode");
         error.isOfflineToken = true;
@@ -48,7 +48,7 @@ apiClient.interceptors.response.use(
             if (error.config?.method === 'get') {
                 const cacheKey = `offline_cache_${error.config.url}`;
                 const cachedData = localStorage.getItem(cacheKey);
-                
+
                 if (cachedData) {
                     return Promise.resolve({
                         data: JSON.parse(cachedData),
@@ -67,7 +67,7 @@ apiClient.interceptors.response.use(
 
         if (error.response?.status === 401 && !originalRequest._retry) {
             if (originalRequest.url?.includes('/auth/login')) return Promise.reject(error);
-            
+
             if (isRefreshing) {
                 return new Promise((resolve, reject) => { failedQueue.push({ resolve, reject }); })
                     .then(token => {
@@ -78,9 +78,12 @@ apiClient.interceptors.response.use(
 
             originalRequest._retry = true;
             isRefreshing = true;
-            
+
             try {
                 const refreshToken = localStorage.getItem('refresh_token');
+                if (!refreshToken) {
+                    throw new Error("No refresh token available");
+                }
                 const { data } = await refreshClient.post('/auth/refresh', {}, {
                     headers: { Authorization: `Bearer ${refreshToken}` }
                 });
@@ -92,6 +95,8 @@ apiClient.interceptors.response.use(
             } catch (err) {
                 processQueue(err, null);
                 isRefreshing = false;
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
                 window.dispatchEvent(new CustomEvent('auth:logout'));
                 return Promise.reject(err);
             }
