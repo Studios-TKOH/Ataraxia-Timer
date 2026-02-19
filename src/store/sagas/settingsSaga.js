@@ -11,7 +11,7 @@ function* fetchSettingsSaga() {
         const settings = yield call(settingsService.getSettings);
         yield put(fetchSettingsSuccess(settings));
     } catch (error) {
-        console.warn("Error fetching settings:", error);
+        console.warn({error:"Error fetching settings:"});
         yield put(fetchSettingsFailure(error.message));
     }
 }
@@ -42,7 +42,7 @@ function* saveSettingsSaga() {
         toast.success('Settings synced'); 
 
     } catch (error) {
-        console.error("Auto-save failed", error);
+        console.error({error:"Error saving settings:"});
         if (error.code === "ERR_NETWORK") {
             toast.error("Offline: Settings saved locally", { id: 'network-error' });
         }
