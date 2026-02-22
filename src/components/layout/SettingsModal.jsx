@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { X, Sun, Monitor, Upload, Volume2, Clock, User, LogOut, Save, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -17,16 +17,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
     const { user, logout } = useAuth();
     const [authMode, setAuthMode] = useState('login');
-    const hasOpenedRef = useRef(false);
 
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            hasOpenedRef.current = true;
-        } else {
-            document.body.style.overflow = 'unset';
+            return () => { document.body.style.overflow = 'unset'; };
         }
-        return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
     const handleTimerChange = (newSettings) => dispatch(updateTimerSettings(newSettings));
@@ -41,6 +37,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
         const audio = new Audio('/sounds/alarm.mp3');
         audio.volume = volume;
         audio.play().catch(e => console.error("Audio failed", e));
+    };
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onloadend = () => handleBgChange(reader.result);
+        reader.readAsDataURL(file);
     };
 
     if (!isOpen) return null;
@@ -75,6 +79,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                             />
                         )}
                     </div>
+
                     <div className="setting-section">
                         <div className="setting-label"><Clock size={14} /> Timer (min)</div>
                         <div className="time-grid">
@@ -86,12 +91,18 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
                     <div className="setting-section">
                         <div className="setting-label"><Monitor size={14} /> System</div>
-                        <div className="setting-row"><span>Auto-start Cycles</span><Switch checked={autoStart} onChange={() => handleAutoStartChange(!autoStart)} /></div>
+                        <div className="setting-row">
+                            <span>Auto-start Cycles</span>
+                            <Switch checked={autoStart} onChange={() => handleAutoStartChange(!autoStart)} />
+                        </div>
                         <div className="setting-row">
                             <span>Long Break Interval</span>
                             <input type="number" min="1" max="10" value={longBreakInterval} onChange={(e) => handleLongBreakChange(parseInt(e.target.value) || 1)} className="input-text-mini" />
                         </div>
-                        <div className="setting-row"><span>24-Hour Clock</span><Switch checked={is24Hour} onChange={() => handleFormatChange(!is24Hour)} /></div>
+                        <div className="setting-row">
+                            <span>24-Hour Clock</span>
+                            <Switch checked={is24Hour} onChange={() => handleFormatChange(!is24Hour)} />
+                        </div>
                     </div>
 
                     <div className="setting-section">
@@ -103,12 +114,27 @@ const SettingsModal = ({ isOpen, onClose }) => {
                                 <input type="color" value={accentColor} onChange={(e) => handleColorChange(e.target.value)} />
                             </div>
                         </div>
+
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
                             <div style={{ display: 'flex', gap: '8px' }}>
-                                <input type="text" placeholder="Background Image URL..." className="input-text" value={bgImage && !bgImage.startsWith('data:') ? bgImage : ''} onChange={(e) => handleBgChange(e.target.value)} style={{ flex: 1 }} />
-                                {bgImage && <button onClick={() => handleBgChange('')} className="btn-icon" style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5' }}><Trash2 size={18} /></button>}
+                                <input
+                                    type="text"
+                                    placeholder="Background Image URL..."
+                                    className="input-text"
+                                    value={bgImage && !bgImage.startsWith('data:') ? bgImage : ''}
+                                    onChange={(e) => handleBgChange(e.target.value)}
+                                    style={{ flex: 1 }}
+                                />
+                                {bgImage && (
+                                    <button onClick={() => handleBgChange('')} className="btn-icon" style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5' }}>
+                                        <Trash2 size={18} />
+                                    </button>
+                                )}
                             </div>
-                            <label className="btn-upload"><Upload size={16} /> <span>Upload from Device</span><input type="file" accept="image/*" onChange={(e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onloadend = () => handleBgChange(r.result); r.readAsDataURL(f); } }} hidden /></label>
+                            <label className="btn-upload" style={{ cursor: 'pointer' }}>
+                                <Upload size={16} /> <span>Upload from Device</span>
+                                <input type="file" accept="image/*" onChange={handleFileUpload} hidden />
+                            </label>
                         </div>
                     </div>
 
@@ -131,6 +157,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     </button>
                 </div>
             </div>
+
             <style>{`
                 .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.9rem; }
                 .input-text-mini { width: 50px; text-align: center; padding: 4px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 6px; color: white; }
