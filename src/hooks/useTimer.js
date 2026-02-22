@@ -1,33 +1,17 @@
-import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-    startTimer, pauseTimer, resetTimer, switchMode,
-    setConfig
-} from '../store/slices/timerSlice';
+import { startTimer, pauseTimer, resetTimer, switchMode } from '../store/slices/timerSlice';
 
-export const useTimer = (initialMode = 'work', settings, autoStart, longBreakInterval, volume) => {
+export const useTimer = () => {
     const dispatch = useDispatch();
     const { mode, timeLeft, isActive, cycles } = useSelector(state => state.timer);
 
-    useEffect(() => {
-        dispatch(setConfig({ settings, autoStart, longBreakInterval, volume }));
-    }, [dispatch, settings, autoStart, longBreakInterval, volume]);
-
     const toggleTimer = () => {
-        if (isActive) {
-            dispatch(pauseTimer());
-        } else {
-            dispatch(startTimer());
-        }
+        if (isActive) dispatch(pauseTimer());
+        else dispatch(startTimer());
     };
 
-    const handleReset = () => {
-        dispatch(resetTimer());
-    };
-
-    const handleSwitchMode = (newMode) => {
-        dispatch(switchMode(newMode));
-    };
+    const handleReset = () => dispatch(resetTimer());
+    const handleSwitchMode = (newMode) => dispatch(switchMode(newMode));
 
     const formatTime = (time) => {
         if (typeof time !== 'number' || isNaN(time)) return '00:00';
