@@ -24,6 +24,18 @@ const AuthForm = ({ isLogin, toggleMode }) => {
     if (isLogin) {
       dispatch(loginRequest({ email: email.trim(), password }));
     } else {
+      if (password.length < 8) {
+        toast.error('Password must be at least 8 characters');
+        return;
+      }
+      if (!/[A-Z]/.test(password)) {
+        toast.error('Password must contain at least one uppercase letter');
+        return;
+      }
+      if (!/[0-9]/.test(password)) {
+        toast.error('Password must contain at least one number');
+        return;
+      }
       dispatch(registerRequest({ username: username.trim(), email: email.trim(), password }));
     }
   };
