@@ -1,31 +1,35 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useSelector } from 'react-redux';
-import { usePomodoro } from '@context/PomodoroContext';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateUser } from '../../auth/store/authSlice';
+import { userService } from '../api/user.api';
+import { authService } from '../../auth/api/auth.api';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 import {
-    User,
+    ShieldCheck,
     Mail,
-    Trophy,
-    Target,
-    Clock,
-    Zap,
-    Save,
+    LogOut,
     Edit2,
-    CheckCircle2,
+    Save,
+    User,
+    Trophy,
+    Trash2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { sanitizeImageUrl } from '@/shared/utils/sanitize';
 
 const ProfileView = () => {
     const user = useSelector((state) => state.auth.user);
     const authStatus = useSelector((state) => state.auth.status);
-
-    const { state } = usePomodoro();
+    const dispatch = useDispatch();
 
     const [isEditing, setIsEditing] = useState(false);
     const [newUsername, setNewUsername] = useState('');
+    const [newAvatar, setNewAvatar] = useState('');
 
-    const currentLevel = state.stats.level || 1;
-    const currentXP = state.stats.xp || 0;
+    const currentLevel = user?.level || 1;
+    const currentXP = user?.xp || 0;
     const xpToNextLevel = 100;
     const progressPercentage = currentXP % xpToNextLevel;
 
@@ -39,19 +43,73 @@ const ProfileView = () => {
 
     const handleStartEdit = () => {
         setNewUsername(displayName);
+        setNewAvatar(user?.avatarUrl || '');
         setIsEditing(true);
     };
 
-    const handleUpdateProfile = () => {
+    const handleUpdateProfile = async () => {
         const cleanUsername = newUsername.trim();
+        const cleanAvatar = newAvatar.trim();
 
         if (cleanUsername.length < 3) {
             toast.error('Username too short');
             return;
         }
 
-        toast.success('Profile updated successfully');
-        setIsEditing(false);
+        if (cleanAvatar && !sanitizeImageUrl(cleanAvatar)) {
+            toast.error('Invalid image URL (use https://)');
+            return;
+        }
+
+        try {
+            const response = await userService.updateInfo({ username: cleanUsername });
+            
+            const mergedUser = {
+                ...user,
+                ...response,
+                id: response.id || user?.id,
+                email: response.email || user?.email,
+                name: response.name || response.username || user?.name,
+            };
+            
+            if (cleanAvatar && cleanAvatar !== user?.avatarUrl) {
+                await userService.updateAvatar({ avatarUrl: cleanAvatar });
+                mergedUser.avatarUrl = cleanAvatar;
+            }
+            
+            dispatch(updateUser(mergedUser));
+            toast.success('Profile updated successfully');
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Failed to update profile", error);
+            toast.error('Failed to update profile');
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await authService.logout();
+        } catch(e) {
+            console.error(e);
+        }
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        window.location.reload();
+    };
+
+    const handleDeleteAccount = async () => {
+        const password = window.prompt("To delete your account, please enter your password:");
+        if (password) {
+            try {
+                await userService.deleteAccount({ confirmationPassword: password });
+                localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
+                window.location.reload();
+            } catch (error) {
+                console.error("Failed to delete account", error);
+                toast.error("Failed to delete account. Incorrect password?");
+            }
+        }
     };
 
     if (authStatus === 'loading') {
@@ -71,9 +129,18 @@ const ProfileView = () => {
             className="space-y-8 mx-auto p-8 w-full max-w-5xl"
         >
             <div className="flex md:flex-row flex-col items-center gap-8 bg-black/40 backdrop-blur-3xl p-10 border border-white/5 rounded-[3rem] glass">
-                <div className="relative">
-                    <div className="flex justify-center items-center bg-accent/20 shadow-glow border-2 border-accent rounded-full w-32 h-32">
-                        <User size={60} className="text-accent" />
+                <div className="relative shrink-0">
+                    <div className="flex justify-center items-center bg-accent/20 shadow-glow border-2 border-accent rounded-full w-32 h-32 overflow-hidden">
+                        {user?.avatarUrl ? (
+                            <LazyLoadImage
+                                src={sanitizeImageUrl(user.avatarUrl) || user.avatarUrl}
+                                alt="Avatar"
+                                effect="blur"
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <User size={60} className="text-accent" />
+                        )}
                     </div>
 
                     <div className="-right-2 -bottom-2 absolute bg-accent shadow-lg p-2 rounded-xl text-white">
@@ -84,13 +151,23 @@ const ProfileView = () => {
                 <div className="flex-1 space-y-2 md:text-left text-center">
                     <div className="flex justify-center md:justify-start items-center gap-4">
                         {isEditing ? (
-                            <input
-                                type="text"
-                                value={newUsername}
-                                onChange={(e) => setNewUsername(e.target.value)}
-                                className="bg-white/5 px-4 py-1 border border-accent/50 rounded-xl outline-none font-black text-white text-2xl uppercase tracking-wider"
-                                autoFocus
-                            />
+                            <div className="flex flex-col gap-2">
+                                <input
+                                    type="text"
+                                    value={newUsername}
+                                    onChange={(e) => setNewUsername(e.target.value)}
+                                    placeholder="Username"
+                                    className="bg-white/5 px-4 py-1 border border-accent/50 rounded-xl outline-none font-black text-white text-2xl uppercase tracking-wider"
+                                    autoFocus
+                                />
+                                <input
+                                    type="text"
+                                    value={newAvatar}
+                                    onChange={(e) => setNewAvatar(e.target.value)}
+                                    placeholder="Avatar Image URL"
+                                    className="bg-white/5 px-4 py-1 border border-white/10 rounded-xl outline-none text-white/70 text-sm"
+                                />
+                            </div>
                         ) : (
                             <h2 className="font-black text-white text-3xl uppercase tracking-[0.1em]">
                                 {displayName}
@@ -132,57 +209,25 @@ const ProfileView = () => {
                     </div>
                 </div>
             </div>
-
-            <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
-                <StatCard
-                    icon={<Clock className="text-blue-400" />}
-                    label="Total Focus"
-                    value={`${Math.floor(state.stats.totalMinutes || 0)}m`}
-                    sublabel="Time in sanctuary"
-                />
-
-                <StatCard
-                    icon={<Target className="text-emerald-400" />}
-                    label="Sessions"
-                    value={state.stats.completedSessions || 0}
-                    sublabel="Tasks completed"
-                />
-
-                <StatCard
-                    icon={<Zap className="text-amber-400" />}
-                    label="Current Streak"
-                    value="5 Days"
-                    sublabel="Consistent focus"
-                />
+            
+            <div className="flex justify-end items-center gap-4 mt-8">
+                <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-sm bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-all"
+                >
+                    <LogOut size={16} />
+                    Logout
+                </button>
+                <button
+                    onClick={handleDeleteAccount}
+                    className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all border border-red-500/20"
+                >
+                    <Trash2 size={16} />
+                    Delete Account
+                </button>
             </div>
         </motion.div>
     );
 };
-
-const StatCard = ({ icon, label, value, sublabel }) => (
-    <div className="group bg-black/40 backdrop-blur-2xl p-8 border border-white/5 hover:border-white/10 rounded-[2.5rem] transition-all glass">
-        <div className="flex justify-between items-start mb-4">
-            <div className="bg-white/5 p-3 rounded-2xl group-hover:scale-110 transition-transform">
-                {icon}
-            </div>
-
-            <CheckCircle2 size={16} className="text-white/10" />
-        </div>
-
-        <div className="space-y-1">
-            <p className="font-black text-[10px] text-white/20 uppercase tracking-[0.2em]">
-                {label}
-            </p>
-
-            <h3 className="font-black text-white text-3xl">
-                {value}
-            </h3>
-
-            <p className="font-bold text-[9px] text-white/40 uppercase tracking-widest">
-                {sublabel}
-            </p>
-        </div>
-    </div>
-);
 
 export default ProfileView;

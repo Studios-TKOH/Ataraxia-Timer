@@ -6,7 +6,8 @@ export const applyAccentColor = (color: string) => {
 
 export const applyBgImage = (url: string) => {
     if (url) {
-        document.documentElement.style.setProperty('--bg-image', `url("${url}")`)
+        const safe = url.replace(/\\/g, '').replace(/"/g, '').replace(/'/g, '').replace(/[();]/g, '')
+        document.documentElement.style.setProperty('--bg-image', `url("${safe}")`)
     } else {
         document.documentElement.style.removeProperty('--bg-image')
     }

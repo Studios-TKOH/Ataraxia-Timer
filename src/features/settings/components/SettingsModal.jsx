@@ -22,6 +22,7 @@ import {
   updateUISettings,
   updateSettingsRequest,
 } from '@/features/settings/store/settingsSlice';
+import { sanitizeImageUrl } from '@/shared/utils/sanitize';
 
 const defaultShortcuts = {
   settings: 's',
@@ -109,17 +110,15 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
   const uiSettings = settings.ui || {};
   const apiSettings = settings.api || {};
 
-  const {
-    focusDuration = 25,
-    shortBreakDuration = 5,
-    longBreakDuration = 15,
-    autoStartBreaks = false,
-    autoStartPomodoros = false,
-    longBreakInterval = 4,
-    theme = 'dark',
-    soundEnabled = true,
-    platform = 'web',
-  } = apiSettings;
+  const pomodoroLength = apiSettings.pomodoroLength ?? apiSettings.focusDuration ?? 25;
+  const shortBreakLength = apiSettings.shortBreakLength ?? apiSettings.shortBreakDuration ?? 5;
+  const longBreakLength = apiSettings.longBreakLength ?? apiSettings.longBreakDuration ?? 15;
+  const autoStartBreaks = apiSettings.autoStartBreaks ?? false;
+  const autoStartPomodoros = apiSettings.autoStartPomodoros ?? false;
+  const longBreakInterval = apiSettings.longBreakInterval ?? 4;
+  const theme = apiSettings.theme ?? 'dark';
+  const soundEnabled = apiSettings.soundEnabled ?? true;
+  const apiVolume = apiSettings.volume ?? 50;
 
   const {
     accentColor = '#14b8a6',
@@ -131,9 +130,9 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
   } = uiSettings;
 
   const [localTimers, setLocalTimers] = useState(() => ({
-    FOCUS: readStoredNumber('focusDuration', focusDuration),
-    SHORT_BREAK: readStoredNumber('shortBreakDuration', shortBreakDuration),
-    LONG_BREAK: readStoredNumber('longBreakDuration', longBreakDuration),
+    FOCUS: readStoredNumber('pomodoroLength', pomodoroLength),
+    SHORT_BREAK: readStoredNumber('shortBreakLength', shortBreakLength),
+    LONG_BREAK: readStoredNumber('longBreakLength', longBreakLength),
   }));
 
   const [localApiSettings, setLocalApiSettings] = useState(() => ({
@@ -142,12 +141,12 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
     longBreakInterval: readStoredNumber('longBreakInterval', longBreakInterval),
     theme: readStoredValue('theme', theme),
     soundEnabled: readStoredBoolean('soundEnabled', soundEnabled),
-    platform: readStoredValue('platform', platform),
+    volume: readStoredNumber('volume', apiVolume),
   }));
 
   const [localUISettings, setLocalUISettings] = useState(() => ({
     accentColor: readStoredValue('accentColor', accentColor),
-    bgImage: readStoredValue('bgImage', bgImage || ''),
+    bgImage: readStoredValue('bgImage', bgImage || 'https://i.ibb.co/ynRCysgx/default-image.png'),
     blurIntensity: readStoredNumber('blurIntensity', blurIntensity),
     volume: readStoredNumber('volume', volume),
     is24Hour: readStoredBoolean('is24Hour', is24Hour),
@@ -164,7 +163,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
       document.documentElement.style.setProperty('--color-accent-rgb', rgb);
       document.documentElement.style.setProperty('--bg-blur', `${(blurIntensity / 100) * 40}px`);
       if (bgImage) {
-        document.documentElement.style.setProperty('--bg-image', `url("${bgImage}")`);
+        document.documentElement.style.setProperty('--bg-image', `url("${bgImage.replace(/\\/g, '').replace(/"/g, '').replace(/'/g, '').replace(/[();]/g, '')}")`);
       } else {
         document.documentElement.style.removeProperty('--bg-image');
       }
@@ -238,15 +237,15 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
     }
 
     const payload = {
-      focusDuration: focusVal,
-      shortBreakDuration: shortVal,
-      longBreakDuration: longVal,
+      pomodoroLength: focusVal,
+      shortBreakLength: shortVal,
+      longBreakLength: longVal,
       autoStartBreaks: localApiSettings.autoStartBreaks,
       autoStartPomodoros: localApiSettings.autoStartPomodoros,
       longBreakInterval: localApiSettings.longBreakInterval,
       theme: localApiSettings.theme,
       soundEnabled: localApiSettings.soundEnabled,
-      platform: localApiSettings.platform,
+      volume: localApiSettings.volume,
     };
 
     const durationByMode = {
@@ -368,21 +367,21 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
                 label="Focus"
                 value={localTimers.FOCUS}
                 onChange={(value) => handleTimerChange('FOCUS', value)}
-                onBlur={() => handleTimerBlur('FOCUS', localTimers.FOCUS, focusDuration)}
+                onBlur={() => handleTimerBlur('FOCUS', localTimers.FOCUS, pomodoroLength)}
               />
 
               <TimeInput
                 label="Short"
                 value={localTimers.SHORT_BREAK}
                 onChange={(value) => handleTimerChange('SHORT_BREAK', value)}
-                onBlur={() => handleTimerBlur('SHORT_BREAK', localTimers.SHORT_BREAK, shortBreakDuration)}
+                onBlur={() => handleTimerBlur('SHORT_BREAK', localTimers.SHORT_BREAK, shortBreakLength)}
               />
 
               <TimeInput
                 label="Long"
                 value={localTimers.LONG_BREAK}
                 onChange={(value) => handleTimerChange('LONG_BREAK', value)}
-                onBlur={() => handleTimerBlur('LONG_BREAK', localTimers.LONG_BREAK, longBreakDuration)}
+                onBlur={() => handleTimerBlur('LONG_BREAK', localTimers.LONG_BREAK, longBreakLength)}
               />
             </div>
           </section>
@@ -594,7 +593,8 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
                     const val = event.target.value;
                     handleUISettingChange('bgImage', val);
                     if (val) {
-                      document.documentElement.style.setProperty('--bg-image', `url("${val}")`);
+                      const safe = val.replace(/\\/g, '').replace(/"/g, '').replace(/'/g, '').replace(/[();]/g, '');
+                      document.documentElement.style.setProperty('--bg-image', `url("${safe}")`);
                     } else {
                       document.documentElement.style.removeProperty('--bg-image');
                     }
@@ -620,7 +620,10 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
                         reader.onloadend = () => {
                           const result = reader.result;
                           handleUISettingChange('bgImage', result);
-                          document.documentElement.style.setProperty('--bg-image', `url("${result}")`);
+                          if (typeof result === 'string') {
+                            const safe = result.replace(/\\/g, '').replace(/"/g, '').replace(/'/g, '').replace(/[();]/g, '');
+                            document.documentElement.style.setProperty('--bg-image', `url("${safe}")`);
+                          }
                         };
 
                         reader.readAsDataURL(file);

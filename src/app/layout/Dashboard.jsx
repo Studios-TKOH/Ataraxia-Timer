@@ -8,6 +8,7 @@ import { usePipController } from '@/features/pomodoro/hooks/usePipController';
 import { useUISettings } from '@/features/settings/hooks/useUISettings';
 import { useThemeEffect } from '@/app/providers/theme/useThemeEffect';
 import { updateUISettings, updateSettingsRequest } from '@/features/settings/store/settingsSlice';
+import { sanitizeForCss } from '@/shared/utils/sanitize';
 
 import Sidebar from '@/app/layout/Sidebar';
 import Header from '@/app/layout/Header';
@@ -18,12 +19,18 @@ import SupportModal from '@/shared/ui/modals/SupportModal';
 import MusicWidget from '@/features/pomodoro/components/MusicWidget';
 import PipPortal from '@/features/pomodoro/components/PipPortal';
 import PaintTransitionOverlay from '@/app/components/PaintTransitionOverlay';
+const ProfileModal = React.lazy(() => import('@/features/profile/components/ProfileModal'));
+const StatsModal = React.lazy(() => import('@/features/stats/components/StatsModal'));
+const GamificationModal = React.lazy(() => import('@/features/gamification/components/GamificationModal'));
 
 const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isSupportOpen, setIsSupportOpen] = useState(false);
     const [isMusicOpen, setIsMusicOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isStatsOpen, setIsStatsOpen] = useState(false);
+    const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
 
     const uiSettings = useUISettings();
     const pomodoro = usePomodoroController();
@@ -73,7 +80,7 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
             <div
                 className="z-0 fixed inset-0 transition-opacity duration-500 pointer-events-none dashboard-background-image"
                 style={{
-                    backgroundImage: uiSettings.bgImage ? `url(${uiSettings.bgImage})` : 'none',
+                    backgroundImage: uiSettings.bgImage ? `url(${sanitizeForCss(uiSettings.bgImage)})` : 'none',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     opacity: uiSettings.bgImage ? 1 : 0,
@@ -88,8 +95,8 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
                 onOpenSettings={() => setIsSettingsOpen(true)}
                 onOpenSupport={() => setIsSupportOpen(true)}
                 onOpenGames={onOpenGames}
-                onOpenStats={onOpenStats}
-                onOpenAchievements={onOpenAchievements}
+                onOpenStats={() => setIsStatsOpen(true)}
+                onOpenAchievements={() => setIsAchievementsOpen(true)}
                 onOpenMusic={toggleMusic}
                 isMusicOpen={isMusicOpen}
                 customShortcuts={uiSettings.customShortcuts}
@@ -102,6 +109,7 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
                     is24Hour={uiSettings.is24Hour}
                     accentColor={uiSettings.accentColor}
                     onOpenSidebar={() => setIsSidebarOpen(true)}
+                    onOpenProfile={() => setIsProfileOpen(true)}
                 />
 
                 <section className="dashboard-grid">
@@ -224,6 +232,33 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
                         isOpen={isSupportOpen}
                         onClose={() => setIsSupportOpen(false)}
                     />
+                )}
+
+                {isProfileOpen && (
+                    <React.Suspense fallback={null}>
+                        <ProfileModal
+                            isOpen={isProfileOpen}
+                            onClose={() => setIsProfileOpen(false)}
+                        />
+                    </React.Suspense>
+                )}
+
+                {isStatsOpen && (
+                    <React.Suspense fallback={null}>
+                        <StatsModal
+                            isOpen={isStatsOpen}
+                            onClose={() => setIsStatsOpen(false)}
+                        />
+                    </React.Suspense>
+                )}
+
+                {isAchievementsOpen && (
+                    <React.Suspense fallback={null}>
+                        <GamificationModal
+                            isOpen={isAchievementsOpen}
+                            onClose={() => setIsAchievementsOpen(false)}
+                        />
+                    </React.Suspense>
                 )}
 
                 {pomodoro.showModeModal && (

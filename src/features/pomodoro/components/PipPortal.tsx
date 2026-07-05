@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { Play, Pause, RotateCcw } from 'lucide-react';
+import { sanitizeForCss } from '@/shared/utils/sanitize';
 
 export interface PipPortalProps {
     pipWindow: Window;
@@ -59,7 +60,7 @@ export const PipPortal: React.FC<PipPortalProps> = ({
                 <div style={{
                     position: 'absolute',
                     inset: 0,
-                    backgroundImage: `url(${bgImage})`,
+                    backgroundImage: `url(${sanitizeForCss(bgImage)})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     zIndex: 0,
