@@ -4,7 +4,7 @@ import Tooltip from '../../shared/ui/overlay/Tooltip';
 import LogoSVG from '@assets/pwa-192x192.svg';
 import toast from 'react-hot-toast';
 
-const Sidebar = ({ onOpenSettings, onOpenSupport, onOpenMusic, isMusicOpen, customShortcuts = {}, isMobileOpen = false, onCloseMobile, theme = 'dark', onToggleTheme }) => {
+const Sidebar = ({ onOpenSettings, onOpenSupport, onOpenMusic, onOpenGames, onOpenStats, onOpenAchievements, isMusicOpen, customShortcuts = {}, isMobileOpen = false, onCloseMobile, theme = 'dark', onToggleTheme }) => {
     const shortcuts = useMemo(() => ({ settings: 's', support: 'h', music: 'm', games: 'g', stats: 't', achievements: 'a', ...customShortcuts }), [customShortcuts]);
     const closeMobile = useCallback(() => onCloseMobile?.(), [onCloseMobile]);
     const runAndClose = useCallback((callback) => { callback?.(); closeMobile(); }, [closeMobile]);
@@ -22,15 +22,15 @@ const Sidebar = ({ onOpenSettings, onOpenSupport, onOpenMusic, isMusicOpen, cust
                 case shortcuts.settings: e.preventDefault(); onOpenSettings(); break;
                 case shortcuts.support: e.preventDefault(); onOpenSupport(); break;
                 case shortcuts.music: e.preventDefault(); onOpenMusic(); break;
-                case shortcuts.games: e.preventDefault(); handleUnderConstruction('Games'); break;
-                case shortcuts.stats: e.preventDefault(); handleUnderConstruction('Insights'); break;
-                case shortcuts.achievements: e.preventDefault(); handleUnderConstruction('Achievements'); break;
+                case shortcuts.games: e.preventDefault(); onOpenGames(); break;
+                case shortcuts.stats: e.preventDefault(); onOpenStats(); break;
+                case shortcuts.achievements: e.preventDefault(); onOpenAchievements(); break;
                 default: break;
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [shortcuts, onOpenSettings, onOpenSupport, onOpenMusic, handleUnderConstruction]);
+    }, [shortcuts, onOpenSettings, onOpenSupport, onOpenMusic, onOpenGames, onOpenStats, onOpenAchievements, handleUnderConstruction]);
 
     useEffect(() => {
         if (!isMobileOpen) return;
@@ -40,6 +40,7 @@ const Sidebar = ({ onOpenSettings, onOpenSupport, onOpenMusic, isMusicOpen, cust
         return () => { window.removeEventListener('keydown', handleEscape); document.body.style.overflow = ''; };
     }, [isMobileOpen, closeMobile]);
 
+    const buttonStyle = 'p-2.5 2xl:p-3 text-white/50 lg:text-white/30 hover:text-accent transition-colors rounded-xl';
     const disabledButtonStyle = 'p-2.5 2xl:p-3 rounded-xl text-white/20 lg:text-white/5 cursor-not-allowed grayscale transition-all';
     const helpText = `${shortcuts.music.toUpperCase()}: Music | ${shortcuts.settings.toUpperCase()}: Settings`.trim();
 
@@ -56,9 +57,9 @@ const Sidebar = ({ onOpenSettings, onOpenSupport, onOpenMusic, isMusicOpen, cust
                     <Tooltip text={`Player (${shortcuts.music.toUpperCase()})`}>
                         <button type="button" onClick={() => runAndClose(onOpenMusic)} className={`p-2.5 2xl:p-3 transition-all rounded-xl ${isMusicOpen ? 'text-accent bg-accent/10 shadow-glow' : 'text-white/50 lg:text-white/30 hover:text-white'}`} style={isMusicOpen ? { color: 'var(--color-accent)', backgroundColor: 'rgba(var(--color-accent-rgb), 0.1)' } : {}}><Music size={22} /></button>
                     </Tooltip>
-                    <Tooltip text="Coming Soon (Games)"><button type="button" onClick={() => handleUnderConstruction('Games')} className={disabledButtonStyle}><Gamepad2 size={22} /></button></Tooltip>
-                    <Tooltip text="Coming Soon (Insights)"><button type="button" onClick={() => handleUnderConstruction('Insights')} className={disabledButtonStyle}><BarChart2 size={22} /></button></Tooltip>
-                    <Tooltip text="Coming Soon (Achievements)"><button type="button" onClick={() => handleUnderConstruction('Achievements')} className={disabledButtonStyle}><Trophy size={22} /></button></Tooltip>
+                    <Tooltip text={`Games (${shortcuts.games.toUpperCase()})`}><button type="button" onClick={() => runAndClose(onOpenGames)} className={buttonStyle}><Gamepad2 size={22} /></button></Tooltip>
+                    <Tooltip text={`Insights (${shortcuts.stats.toUpperCase()})`}><button type="button" onClick={() => runAndClose(onOpenStats)} className={buttonStyle}><BarChart2 size={22} /></button></Tooltip>
+                    <Tooltip text={`Achievements (${shortcuts.achievements.toUpperCase()})`}><button type="button" onClick={() => runAndClose(onOpenAchievements)} className={buttonStyle}><Trophy size={22} /></button></Tooltip>
                 </nav>
                 <div className="flex flex-col gap-4 lg:gap-3 2xl:gap-4">
                     <Tooltip text={helpText}><div className="p-2.5 2xl:p-3 text-accent/40 hover:text-accent transition-colors cursor-help" style={{ color: 'rgba(var(--color-accent-rgb), 0.4)' }}><Keyboard size={22} /></div></Tooltip>

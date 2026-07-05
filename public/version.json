@@ -1,14 +1,14 @@
 {
-  "version": "2.0.0-fd97975",
+  "version": "2.0.0-649a3e0",
   "appVersion": "2.0.0",
-  "build": "fd97975",
-  "date": "2026-06-28T21:28:08.348Z",
+  "build": "649a3e0",
+  "date": "2026-07-04T14:36:14.250Z",
   "changelog": [
-    "fix(pwa): restore service worker registration and version guard",
-    "style(pages): redesign informational views to minimalist split layouts",
-    "feat(tags): implement remote sync and inline editing/deletion in categories",
-    "fix(theme): blur background image directly and update PiP portal",
-    "style: apply Aputrak design system and visual style to Ataraxia timer"
+    "Sync engine with offline batching",
+    "Service worker and update fixes",
+    "Page layout improvements",
+    "Tag sync and inline editing",
+    "Visual and background fixes"
   ],
   "targetUrl": "/"
 }

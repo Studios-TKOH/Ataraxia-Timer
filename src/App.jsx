@@ -7,7 +7,6 @@ import { processSyncQueue } from './infrastructure/sync/syncManager';
 import { checkAuthRequest } from './features/auth/store/authSlice';
 import { fetchTasksRequest } from './features/tasks/store/tasksSlice';
 
-import InstallPrompt from './app/components/InstallPrompt';
 import Maintenance from './app/pages/Maintenance';
 import ComingSoon from './app/pages/ComingSoon';
 import Restricted from './app/pages/Restricted';
@@ -99,7 +98,6 @@ function App() {
       />
 
       <Toaster position="top-right" />
-      <InstallPrompt />
 
       {isReady && (
         <Suspense fallback={null}>
