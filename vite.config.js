@@ -14,15 +14,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: null,
       devOptions: {
-        enabled: false,
+        enabled: true,
         type: 'module',
         navigateFallback: 'index.html'
       },
       includeAssets: [
         'pwa-192x192.png',
         'pwa-512x512.png',
-        'screenshot-desktop.png',
-        'screenshot-mobile.png',
         'robots.txt',
         'sitemap.xml'
       ],
@@ -62,16 +60,16 @@ export default defineConfig({
         ],
         screenshots: [
           {
-            src: 'screenshot-desktop.png',
+            src: 'https://i.ibb.co/rRNbd7rQ/screenshot-desktop.jpg',
             sizes: '1280x720',
-            type: 'image/png',
+            type: 'image/jpeg',
             form_factor: 'wide',
             label: 'Ataraxia Timer desktop focus dashboard'
           },
           {
-            src: 'screenshot-mobile.png',
+            src: 'https://i.ibb.co/gZgdYHSQ/screenshot-mobile.jpg',
             sizes: '720x1280',
-            type: 'image/png',
+            type: 'image/jpeg',
             form_factor: 'narrow',
             label: 'Ataraxia Timer mobile Pomodoro dashboard'
           }

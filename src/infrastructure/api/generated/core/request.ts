@@ -64,9 +64,7 @@ export const getQueryString = (params: Record<string, any>): string => {
     const process = (key: string, value: any) => {
         if (isDefined(value)) {
             if (Array.isArray(value)) {
-                value.forEach(v => {
-                    process(key, v);
-                });
+                append(key, value.join(','));
             } else if (typeof value === 'object') {
                 Object.entries(value).forEach(([k, v]) => {
                     process(`${key}[${k}]`, v);

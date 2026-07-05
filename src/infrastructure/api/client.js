@@ -14,9 +14,59 @@ const api = axios.create({
     withCredentials: true,
 });
 
+function parseJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(base64));
+    } catch {
+        return null;
+    }
+}
+
+function isTokenExpiringSoon(token, marginMs = 60_000) {
+    const payload = parseJwt(token);
+    if (!payload?.exp) return true;
+    return Date.now() >= payload.exp * 1000 - marginMs;
+}
+
+let refreshPromise = null;
+
+async function tryRefresh() {
+    if (refreshPromise) return refreshPromise;
+
+    refreshPromise = (async () => {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) return false;
+
+        try {
+            const { data } = await axios.post(
+                `${api.defaults.baseURL}/auth/refresh`,
+                { refreshToken }
+            );
+            localStorage.setItem('token', data.access_token);
+            if (data.refresh_token) localStorage.setItem('refreshToken', data.refresh_token);
+            return true;
+        } catch {
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            return false;
+        } finally {
+            refreshPromise = null;
+        }
+    })();
+
+    return refreshPromise;
+}
+
 api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
+    async (config) => {
+        let token = localStorage.getItem('token');
+
+        if (token && isTokenExpiringSoon(token) && !config.url?.includes('/auth/refresh')) {
+            await tryRefresh();
+            token = localStorage.getItem('token');
+        }
 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -36,46 +86,53 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
+        const status = error.response?.status;
+
         if (
-            error.response?.status === 401 &&
+            (status === 401 || status === 500) &&
             !originalRequest._retry &&
             !originalRequest.url?.includes('/auth/refresh')
         ) {
             originalRequest._retry = true;
 
-            const refreshToken = localStorage.getItem('refreshToken');
-
-            if (refreshToken) {
-                try {
-                    const { data } = await axios.post(
-                        `${api.defaults.baseURL}/auth/refresh`,
-                        {},
-                        {
-                            headers: {
-                                Authorization: `Bearer ${refreshToken}`,
-                            },
-                        }
-                    );
-
-                    localStorage.setItem('token', data.access_token);
-                    localStorage.setItem('refreshToken', data.refresh_token);
-
-                    originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-
-                    return api(originalRequest);
-                } catch (refreshError) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('refreshToken');
-
-                    window.location.reload();
-
-                    return Promise.reject(refreshError);
-                }
+            const refreshed = await tryRefresh();
+            if (refreshed) {
+                const newToken = localStorage.getItem('token');
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                return api(originalRequest);
             }
+
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            window.location.reload();
         }
 
         return Promise.reject(error);
     }
 );
+
+let lastRefreshTime = 0;
+const REFRESH_COOLDOWN_MS = 60 * 60 * 1000;
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible') return;
+
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const payload = parseJwt(token);
+        if (!payload?.exp) return;
+
+        const expiresInMs = payload.exp * 1000 - Date.now();
+        const fiveMinutesMs = 5 * 60 * 1000;
+        const now = Date.now();
+
+        if (expiresInMs < fiveMinutesMs && now - lastRefreshTime > REFRESH_COOLDOWN_MS) {
+            lastRefreshTime = now;
+            tryRefresh();
+        }
+    });
+}
 
 export default api;
