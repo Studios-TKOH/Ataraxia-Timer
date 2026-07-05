@@ -1,34 +1,41 @@
 import { SettingModel } from "../types/setting.model"
-import { SettingResponse } from "../types/setting.dto"
+import { SettingResponseDto } from "../types/setting.dto"
 
 const DEFAULTS = {
-    focusDuration: 25,
-    shortBreakDuration: 5,
-    longBreakDuration: 15,
+    pomodoroLength: 25,
+    shortBreakLength: 5,
+    longBreakLength: 15,
     longBreakInterval: 4,
     autoStartBreaks: false,
     autoStartPomodoros: false,
-    theme: "light",
     soundEnabled: true,
-    platform: "web"
+    volume: 50,
+    theme: "dark" as const,
+    language: "en",
+    timeFormat: "24h" as const,
+    weekStart: "monday" as const,
+    notificationsEnabled: true,
 }
 
-export function mapSettingDtoToModel(dto: SettingResponse): SettingModel {
+export function mapSettingDtoToModel(dto: SettingResponseDto): SettingModel {
     return {
         id: dto.id,
-        userId: dto.userId,
 
-        focusDuration: dto.focusDuration ?? DEFAULTS.focusDuration,
-        shortBreakDuration: dto.shortBreakDuration ?? DEFAULTS.shortBreakDuration,
-        longBreakDuration: dto.longBreakDuration ?? DEFAULTS.longBreakDuration,
+        pomodoroLength: dto.pomodoroLength ?? DEFAULTS.pomodoroLength,
+        shortBreakLength: dto.shortBreakLength ?? DEFAULTS.shortBreakLength,
+        longBreakLength: dto.longBreakLength ?? DEFAULTS.longBreakLength,
         longBreakInterval: dto.longBreakInterval ?? DEFAULTS.longBreakInterval,
 
         autoStartBreaks: dto.autoStartBreaks ?? DEFAULTS.autoStartBreaks,
         autoStartPomodoros: dto.autoStartPomodoros ?? DEFAULTS.autoStartPomodoros,
 
-        theme: dto.theme ?? DEFAULTS.theme,
         soundEnabled: dto.soundEnabled ?? DEFAULTS.soundEnabled,
-        platform: dto.platform ?? DEFAULTS.platform,
+        volume: dto.volume ?? DEFAULTS.volume,
+        theme: dto.theme ?? DEFAULTS.theme,
+        language: dto.language ?? DEFAULTS.language,
+        timeFormat: dto.timeFormat ?? DEFAULTS.timeFormat,
+        weekStart: dto.weekStart ?? DEFAULTS.weekStart,
+        notificationsEnabled: dto.notificationsEnabled ?? DEFAULTS.notificationsEnabled,
 
         syncStatus: 'synced',
         updatedAt: Date.now()
@@ -37,14 +44,18 @@ export function mapSettingDtoToModel(dto: SettingResponse): SettingModel {
 
 export function mapModelToUpdateDto(model: SettingModel) {
     return {
-        focusDuration: model.focusDuration,
-        shortBreakDuration: model.shortBreakDuration,
-        longBreakDuration: model.longBreakDuration,
+        pomodoroLength: model.pomodoroLength,
+        shortBreakLength: model.shortBreakLength,
+        longBreakLength: model.longBreakLength,
         longBreakInterval: model.longBreakInterval,
         autoStartBreaks: model.autoStartBreaks,
         autoStartPomodoros: model.autoStartPomodoros,
-        theme: model.theme,
         soundEnabled: model.soundEnabled,
-        platform: model.platform
+        volume: model.volume,
+        theme: model.theme,
+        language: model.language,
+        timeFormat: model.timeFormat,
+        weekStart: model.weekStart,
+        notificationsEnabled: model.notificationsEnabled,
     }
 }

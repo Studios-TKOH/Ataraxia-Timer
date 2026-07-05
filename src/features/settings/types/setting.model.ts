@@ -1,23 +1,33 @@
-import type { SettingPlatform, SettingTheme } from './setting.dto'
+import type { SettingTheme, SettingTimeFormat, SettingWeekStart } from './setting.dto'
 
 export type SettingSyncStatus = 'synced' | 'pending_update'
 
 export interface SettingModel {
   id: string
-  userId: string
 
-  focusDuration: number
-  shortBreakDuration: number
-  longBreakDuration: number
+  pomodoroLength: number
+  shortBreakLength: number
+  longBreakLength: number
   longBreakInterval: number
 
   autoStartBreaks: boolean
   autoStartPomodoros: boolean
 
-  theme: SettingTheme
   soundEnabled: boolean
-  platform: SettingPlatform
+  volume: number
+  theme: SettingTheme
+  language: string
+  timeFormat: SettingTimeFormat
+  weekStart: SettingWeekStart
+  notificationsEnabled: boolean
 
   syncStatus: SettingSyncStatus
   updatedAt: number
+
+  /** @deprecated Old field name - migrate to pomodoroLength */
+  focusDuration?: number
+  /** @deprecated Old field name - migrate to shortBreakLength */
+  shortBreakDuration?: number
+  /** @deprecated Old field name - migrate to longBreakLength */
+  longBreakDuration?: number
 }
