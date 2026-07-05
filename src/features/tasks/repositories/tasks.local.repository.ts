@@ -42,7 +42,7 @@ export const tasksLocalRepository = {
             id: `local-${crypto.randomUUID()}`,
             userId: LOCAL_USER_ID,
             title: payload.title,
-            tagIds: [],
+            tagIds: payload.tagIds || [],
             status: 'TODO',
             createdAt: nowIso(),
             syncStatus: 'pending_create',

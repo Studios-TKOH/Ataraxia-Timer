@@ -12,7 +12,7 @@ export const useTags = () => {
     dispatch(actions.fetchTagsRequest())
   }, [dispatch])
 
-  const addTag = (data: CreateTagDto) => dispatch(actions.addTagRequest(data))
+  const addTag = (data: CreateTagDto & { id?: string }) => dispatch(actions.addTagRequest(data))
   const updateTag = (id: string, data: UpdateTagDto) =>
     dispatch(actions.updateTagRequest({ id, data }))
   const removeTag = (id: string) => dispatch(actions.deleteTagRequest(id))

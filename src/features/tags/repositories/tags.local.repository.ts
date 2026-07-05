@@ -13,11 +13,24 @@ export const tagsLocalRepository = {
         await db.tags.update(id, { ...data, updatedAt: Date.now() });
     },
 
-    async delete(id: string): Promise<void> {
+    async delete(id: string): Promise<boolean> {
+        const current = await db.tags.get(id);
+        if (!current) return false;
+
+        if (current.syncStatus === 'pending_create') {
+            await db.tags.delete(id);
+            await db.syncQueue
+                .where('[entity+entityId]')
+                .equals(['tags', id])
+                .delete();
+            return false;
+        }
+
         await db.tags.update(id, {
             deletedAt: Date.now(),
             syncStatus: 'pending_delete'
         });
+        return true;
     },
 
     async replaceAll(tags: LocalTagModel[]): Promise<void> {

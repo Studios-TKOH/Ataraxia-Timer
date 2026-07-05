@@ -37,6 +37,7 @@ const TaskManager = () => {
 
     if (name.trim().length < 2) return;
 
+    let finalTagId = selectedTagId;
     let finalTagName = '';
 
     if (selectedTagId) {
@@ -51,16 +52,22 @@ const TaskManager = () => {
       );
 
       if (!existingTag) {
-        await addTag({ name: finalTagName, color: tagColor });
-      } else if (existingTag.color !== tagColor) {
-        await updateTag(existingTag.id, { color: tagColor });
+        finalTagId = `local-tag-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        await addTag({ id: finalTagId, name: finalTagName, color: tagColor });
+      } else {
+        finalTagId = existingTag.id;
+        if (existingTag.color !== tagColor) {
+          await updateTag(existingTag.id, { color: tagColor });
+        }
       }
     }
 
-    await addTask({
-      title: name.trim(),
-      tagIds: selectedTagId ? [selectedTagId] : [],
-    });
+    const newTaskPayload: CreateTaskDto = { title: name.trim() };
+    if (finalTagId) {
+      newTaskPayload.tagIds = [finalTagId];
+    }
+    
+    await addTask(newTaskPayload);
 
     setName('');
     setEst(1);
@@ -165,7 +172,7 @@ const TaskManager = () => {
         ) : (
           tasks.map((task: any) => {
             const tagData = tags.find(
-              (tag) => task.tags?.some((t: any) => tag.id === t.id)
+              (tag) => task.tags?.some((t: any) => tag.id === t.id) || task.tagIds?.includes(tag.id)
             );
 
             const displayColor = tagData?.color || '#5fbfff';
@@ -236,7 +243,7 @@ const TaskManager = () => {
                       </p>
                     )}
 
-                    {task.tags && task.tags.length > 0 && (
+                    {tagData && (
                       <div className="flex items-center gap-1.5 mt-1 min-w-0">
                         <TagIcon size={10} style={{ color: displayColor }} className="shrink-0" />
 
@@ -247,14 +254,14 @@ const TaskManager = () => {
                             opacity: 0.55,
                           }}
                         >
-                          {task.tags[0].name}
+                          {tagData.name}
                         </span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-0.5 opacity-100 sm:group-hover:opacity-100 sm:opacity-0 transition-all shrink-0">
+                <div className="flex items-center gap-0.5 opacity-50 hover:opacity-100 transition-opacity shrink-0">
                   {!isEditing && (
                     <button
                       type="button"

@@ -1,10 +1,9 @@
-import { call, put, takeLatest, all } from 'redux-saga/effects';
+import { call, put, takeLatest, all, delay } from 'redux-saga/effects';
 import { toast } from 'react-hot-toast';
 import { db } from '@/infrastructure/database/db';
 import { tagsLocalRepository } from '../repositories/tags.local.repository';
-import { tagsService } from '../api/tags.api';
 import { TagResponse } from '@/features/tags/types/tag.dto';
-import { v4 as uuidv4 } from 'uuid';
+import { addToSyncQueue, processSyncQueue } from '@/infrastructure/sync/syncManager';
 import {
     fetchTagsRequest, fetchTagsSuccess, fetchTagsFailure,
     addTagRequest, addTagSuccess,
@@ -13,21 +12,51 @@ import {
     tagsOperationFailure
 } from './tagsSlice';
 
-function* handleFetchTags() {
+const TAG_POLL_INTERVAL = 30_000;
+
+function* pollServerTags(): Generator<any, void, any> {
+    while (true) {
+        try {
+            yield delay(TAG_POLL_INTERVAL);
+
+            const token = localStorage.getItem('token');
+            if (!token || !navigator.onLine) continue;
+
+            const { TagControllerService } = yield import('@/infrastructure/api/generated');
+            const serverTags: TagResponse[] = yield call([TagControllerService, 'getTags']);
+
+            if (Array.isArray(serverTags) && serverTags.length > 0) {
+                const localTags: TagResponse[] = yield call(tagsLocalRepository.getAll);
+                const localMap = new Map(localTags.map(t => [t.id, t]));
+
+                for (const serverTag of serverTags) {
+                    if (!serverTag.id) continue;
+                    const existing = localMap.get(serverTag.id);
+                    if (!existing || (existing.syncStatus === 'synced')) {
+                        yield call(tagsLocalRepository.create, {
+                            ...serverTag,
+                            syncStatus: 'synced',
+                            updatedAt: Date.now(),
+                            deletedAt: null,
+                        } as any);
+                    }
+                }
+
+                const merged: TagResponse[] = yield call(tagsLocalRepository.getAll);
+                yield put(fetchTagsSuccess(merged));
+            }
+        } catch {
+            // silent fail on poll
+        }
+    }
+}
+
+function* handleFetchTags(): Generator<any, void, any> {
     try {
         const token = localStorage.getItem('token');
 
-        if (!token) {
-            const localTags: TagResponse[] = yield call(tagsLocalRepository.getAll);
-            yield put(fetchTagsSuccess(localTags));
-            return;
-        }
-
-        if (navigator.onLine) {
-            const data: TagResponse[] = yield call(tagsService.getAll);
-            yield call([tagsLocalRepository, tagsLocalRepository.replaceAll], data);
-            yield put(fetchTagsSuccess(data));
-            return;
+        if (token && navigator.onLine) {
+            yield call(processSyncQueue);
         }
 
         const localTags: TagResponse[] = yield call(tagsLocalRepository.getAll);
@@ -42,12 +71,13 @@ function* handleFetchTags() {
     }
 }
 
-function* handleAddTag(action: any) {
+function* handleAddTag(action: any): Generator<any, void, any> {
     try {
-        const tempId = `local-tag-${Date.now()}`;
+        const tempId = action.payload.id || `local-tag-${Date.now()}`;
         const newTag: TagResponse = {
             id: tempId,
-            ...action.payload,
+            name: action.payload.name,
+            color: action.payload.color
         };
 
         yield call(tagsLocalRepository.create, {
@@ -59,23 +89,24 @@ function* handleAddTag(action: any) {
         yield put(addTagSuccess(newTag));
         toast.success(`Category ready`);
 
-        yield call([db.syncQueue, db.syncQueue.put], {
-            id: uuidv4(),
+        yield call(addToSyncQueue, {
             method: 'POST',
             url: '/tags',
             entity: 'tags',
             entityId: tempId,
-            data: action.payload,
-            retries: 0,
-            ts: Date.now()
+            data: action.payload
         });
+        
+        if (navigator.onLine) {
+            yield call(processSyncQueue);
+        }
     } catch (e: any) {
         yield put(tagsOperationFailure(e.message));
         toast.error('Failed to create category');
     }
 }
 
-function* handleUpdateTag(action: any) {
+function* handleUpdateTag(action: any): Generator<any, void, any> {
     try {
         const { id, data } = action.payload;
 
@@ -87,38 +118,43 @@ function* handleUpdateTag(action: any) {
         yield put(updateTagSuccess({ id, ...data }));
         toast.success('Category updated');
 
-        yield call([db.syncQueue, db.syncQueue.put], {
-            id: uuidv4(),
+        yield call(addToSyncQueue, {
             method: 'PATCH',
             url: `/tags/${id}`,
             entity: 'tags',
             entityId: id,
-            data: data,
-            retries: 0,
-            ts: Date.now()
+            data: data
         });
+        
+        if (navigator.onLine) {
+            yield call(processSyncQueue);
+        }
     } catch (e: any) {
         yield put(tagsOperationFailure(e.message));
         toast.error('Update failed');
     }
 }
 
-function* handleDeleteTag(action: any) {
+function* handleDeleteTag(action: any): Generator<any, void, any> {
     try {
         const id = action.payload;
-        yield call(tagsLocalRepository.delete, id);
+        
+        const shouldSyncDelete: boolean = yield call(tagsLocalRepository.delete, id);
         yield put(deleteTagSuccess(id));
         toast.success('Category removed');
 
-        yield call([db.syncQueue, db.syncQueue.put], {
-            id: uuidv4(),
-            method: 'DELETE',
-            url: `/tags/${id}`,
-            entity: 'tags',
-            entityId: id,
-            retries: 0,
-            ts: Date.now()
-        });
+        if (shouldSyncDelete) {
+            yield call(addToSyncQueue, {
+                method: 'DELETE',
+                url: `/tags/${id}`,
+                entity: 'tags',
+                entityId: id
+            });
+        }
+        
+        if (navigator.onLine) {
+            yield call(processSyncQueue);
+        }
     } catch (e: any) {
         yield put(tagsOperationFailure(e.message));
         toast.error('Could not delete category');
@@ -131,5 +167,6 @@ export default function* tagSaga() {
         takeLatest(addTagRequest.type, handleAddTag),
         takeLatest(updateTagRequest.type, handleUpdateTag),
         takeLatest(deleteTagRequest.type, handleDeleteTag),
+        pollServerTags(),
     ]);
 }
