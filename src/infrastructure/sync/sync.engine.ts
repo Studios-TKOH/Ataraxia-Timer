@@ -9,8 +9,8 @@ class SyncEngine {
         this.isRunning = true
 
         try {
-            await this.syncSettings()
-            // futuro:
+            // futuro: implementar sync individual por entidad
+            // await this.syncSettings()
             // await this.syncTasks()
             // await this.syncTags()
         } finally {

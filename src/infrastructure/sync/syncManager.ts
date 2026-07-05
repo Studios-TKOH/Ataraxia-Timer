@@ -1,5 +1,5 @@
 import api from '@api/client'
-import { db, SyncQueueItem } from '@/infrastructure/database/db'
+import { db, AppDB, SyncQueueItem } from '@/infrastructure/database/db'
 
 type SyncMethod = 'POST' | 'PATCH' | 'PUT' | 'DELETE'
 
@@ -7,7 +7,7 @@ export type AddSyncQueueItem = {
   method: SyncMethod
   url: string
   data?: unknown
-  entity?: 'tasks' | 'settings'
+  entity?: 'tasks' | 'settings' | 'tags'
   entityId?: string
 }
 
@@ -95,25 +95,33 @@ export const addToSyncQueue = async (req: AddSyncQueueItem) => {
 const getQueue = () => db.syncQueue.orderBy('ts').toArray()
 
 const applySyncedEntity = async (item: SyncQueueItem, responseData: any) => {
-  if (item.entity !== 'tasks') return
-
   if (item.method === 'DELETE' && item.entityId) {
-    await db.tasks.delete(item.entityId)
+    if (item.entity === 'tasks') await db.tasks.delete(item.entityId)
+    else if (item.entity === 'tags') await db.tags.delete(item.entityId)
     return
   }
 
   if (!responseData?.id) return
 
-  if (item.method === 'POST' && item.entityId && item.entityId !== responseData.id) {
-    await db.tasks.delete(item.entityId)
+  if (item.entity === 'tasks') {
+    if (item.method === 'POST' && item.entityId && item.entityId !== responseData.id) {
+      await db.tasks.delete(item.entityId)
+    }
+    await db.tasks.put({
+      ...responseData,
+      syncStatus: 'synced',
+      updatedAt: Date.now(),
+      deletedAt: null,
+    })
+  } else if (item.entity === 'tags') {
+    await db.tags.put({
+      ...responseData,
+      id: responseData.id,
+      syncStatus: 'synced',
+      updatedAt: Date.now(),
+      deletedAt: null,
+    })
   }
-
-  await db.tasks.put({
-    ...responseData,
-    syncStatus: 'synced',
-    updatedAt: Date.now(),
-    deletedAt: null,
-  })
 }
 
 let lastSyncTime = 0
@@ -121,6 +129,9 @@ const SYNC_COOLDOWN_MS = 5000 // 5 seconds cooldown
 
 export const processSyncQueue = async () => {
   if (syncing || !navigator.onLine) return
+
+  const token = localStorage.getItem('token');
+  if (!token) return;
   
   const now = Date.now()
   if (now - lastSyncTime < SYNC_COOLDOWN_MS) return
@@ -149,46 +160,80 @@ export const processSyncQueue = async () => {
 
       try {
         const { SyncControllerService } = await import('@/infrastructure/api/generated')
+
         await SyncControllerService.push({ mutations })
 
         for (const item of queue) {
           await db.syncQueue.delete(item.id)
         }
       } catch (error: any) {
-        console.error('Error pushing mutations:', error)
+        const status = error?.status || error?.response?.status
+        if (status === 401 || status === 500) {
+          console.warn('Sync push auth error. Token may need refresh. Will retry next cycle.')
+          for (const item of queue) {
+            const newRetries = (item.retries || 0) + 1
+            if (newRetries >= MAX_RETRIES) {
+              console.warn(`Dropping sync item ${item.id} after ${MAX_RETRIES} retries`)
+              await db.syncQueue.delete(item.id)
+            } else {
+              await db.syncQueue.update(item.id, { retries: newRetries })
+            }
+          }
+        } else {
+          console.error('Error pushing mutations:', error)
+          for (const item of queue) {
+            const newRetries = (item.retries || 0) + 1
+            if (newRetries >= MAX_RETRIES) {
+              await db.syncQueue.delete(item.id)
+            } else {
+              await db.syncQueue.update(item.id, { retries: newRetries })
+            }
+          }
+        }
       }
     }
 
     // Now pull updates
     try {
-      const { SyncControllerService } = await import('@/infrastructure/api/generated')
       const lastSync = localStorage.getItem('ataraxia_lastSyncCursor') || undefined
-      const response = await SyncControllerService.pull(
-        lastSync,
-        100,
-        undefined,
-        ['tasks', 'settings', 'tags']
-      )
+      const params = new URLSearchParams()
+      if (lastSync) params.set('cursor', lastSync)
+      params.set('limit', '100')
+      params.set('entityTypes', 'tasks,settings,tags')
+
+      const { data: response } = await api.get(`/sync/pull?${params.toString()}`)
 
       if (response.changes && response.changes.length > 0) {
+        const entityToTable: Record<string, keyof AppDB> = {
+          tasks: 'tasks',
+          settings: 'settings',
+          tags: 'tags',
+        }
+
         for (const change of response.changes) {
           if (!change.entityId || !change.entityType) continue
 
-          const storeName = change.entityType as keyof AppDB
+          const tableName = entityToTable[change.entityType]
+          if (!tableName || !db[tableName]) continue
 
-          if (!db[storeName]) continue
-          
-          const table = db[storeName] as any
+          const table = db[tableName] as any
 
-          if (change.operation === 'DELETE') {
-            await table.delete(change.entityId)
-          } else if (change.payload) {
-            await table.put({
-              ...change.payload,
-              syncStatus: 'synced',
-              updatedAt: Date.now(),
-              deletedAt: null
-            })
+          try {
+            if (change.operation === 'DELETE') {
+              await table.delete(change.entityId)
+            } else if (change.payload) {
+              const base = tableName === 'settings'
+                ? { syncStatus: 'synced', updatedAt: Date.now() }
+                : { syncStatus: 'synced', updatedAt: Date.now(), deletedAt: null }
+
+              await table.put({
+                ...(change.payload as any),
+                ...base,
+                id: change.entityId,
+              })
+            }
+          } catch (err) {
+            console.error(`Error applying change for ${change.entityType}/${change.entityId}:`, err)
           }
         }
       }
@@ -196,8 +241,15 @@ export const processSyncQueue = async () => {
       if (response.nextCursor) {
         localStorage.setItem('ataraxia_lastSyncCursor', response.nextCursor)
       }
-    } catch (error) {
-      console.error('Error pulling updates:', error)
+    } catch (error: any) {
+      if (error?.status === 401 || error?.response?.status === 401) {
+        console.warn('Sync pull unauthorized (token may be expired). Will retry next cycle.')
+      } else if (error?.status === 500 || error?.response?.status === 500) {
+        console.error('Server error on pull, clearing cursor to unstuck...', error)
+        localStorage.removeItem('ataraxia_lastSyncCursor')
+      } else {
+        console.error('Error pulling updates:', error)
+      }
     }
 
   } finally {
