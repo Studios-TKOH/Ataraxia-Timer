@@ -174,6 +174,10 @@ const slice = createSlice({
       state.status = 'idle'
       state.error = action.payload
     },
+
+    updateUser: (state, action: PayloadAction<AuthUser>) => {
+      state.user = { ...state.user, ...action.payload }
+    }
   },
 })
 
@@ -197,6 +201,7 @@ export const {
   logoutRequest,
   logoutSuccess,
   logoutFailure,
+  updateUser,
 } = slice.actions
 
 export default slice.reducer

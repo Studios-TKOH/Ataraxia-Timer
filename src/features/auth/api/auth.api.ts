@@ -6,6 +6,9 @@ import {
     GuestLoginDto,
     ForgotPasswordDto,
     ResetPasswordDto,
+    ChangePasswordDto,
+    VerifyEmailDto,
+    ResendVerificationDto,
     AuthResponse
 } from '../types/auth.dto';
 
@@ -17,12 +20,19 @@ const ENDPOINTS = {
     REGISTER: '/auth/register',
     GUEST: '/auth/guest-login',
     FORGOT_PASSWORD: '/auth/forgot-password',
-    RESET_PASSWORD: '/auth/reset-password'
+    RESET_PASSWORD: '/auth/reset-password',
+    CHANGE_PASSWORD: '/auth/change-password',
+    VERIFY_EMAIL: '/auth/verify-email',
+    RESEND_VERIFICATION: '/auth/resend-verification',
 };
 
 export const authService = {
     login: async (data: LoginDto): Promise<AuthResponse> => {
-        const res = await api.post<AuthResponse>(ENDPOINTS.LOGIN, data)
+        const payload = {
+            identifier: data.email,
+            password: data.password
+        };
+        const res = await api.post<AuthResponse>(ENDPOINTS.LOGIN, payload)
         return res.data
     },
 
@@ -56,5 +66,17 @@ export const authService = {
 
     resetPassword: async (data: ResetPasswordDto) => {
         await api.post(ENDPOINTS.RESET_PASSWORD, data)
-    }
+    },
+
+    changePassword: async (data: ChangePasswordDto) => {
+        await api.post(ENDPOINTS.CHANGE_PASSWORD, data)
+    },
+
+    verifyEmail: async (data: VerifyEmailDto) => {
+        await api.post(ENDPOINTS.VERIFY_EMAIL, data)
+    },
+
+    resendVerification: async (data: ResendVerificationDto) => {
+        await api.post(ENDPOINTS.RESEND_VERIFICATION, data)
+    },
 };

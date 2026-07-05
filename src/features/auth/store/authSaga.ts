@@ -1,5 +1,6 @@
 import { call, put, takeLatest, all } from 'redux-saga/effects';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
 
 import { authService } from '@/features/auth/api/auth.api';
 import {
@@ -165,7 +166,39 @@ function* handleCheckAuth(): Generator<any, void, any> {
       return;
     }
 
-    const res: any = yield call(authService.getProfile);
+    let res: any;
+    try {
+      res = yield call(authService.getProfile);
+    } catch (profileError: any) {
+      const status = profileError?.response?.status || profileError?.status;
+      if (status === 401 || status === 500) {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+          try {
+            const { data } = yield call(
+              [axios, axios.post],
+              `${import.meta.env.VITE_API_URL}/auth/refresh`,
+              { refreshToken }
+            );
+            localStorage.setItem('token', data.access_token);
+            if (data.refresh_token) localStorage.setItem('refreshToken', data.refresh_token);
+            res = yield call(authService.getProfile);
+          } catch {
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            yield put(loginFailure('Session expired'));
+            return;
+          }
+        } else {
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          yield put(loginFailure('Session expired'));
+          return;
+        }
+      } else {
+        throw profileError;
+      }
+    }
 
     const user = res.user || res.data?.user || res;
     const accessToken = res.access_token || res.accessToken || token;
