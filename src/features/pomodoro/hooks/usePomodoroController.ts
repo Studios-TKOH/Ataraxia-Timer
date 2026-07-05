@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { gamificationService } from '../../gamification/api/gamification.api'
 import type { RootState } from '@/store'
 import { db } from '@/infrastructure/database/db'
 import { mapSettings } from '../mappers/mapSettings'
@@ -10,9 +11,12 @@ import {
     resumeTimer,
     updateDurations,
     startTimer,
-    restoreSession
+    restoreSession,
+    setServerId
 } from '../store/timerSlice'
 import { useTimer } from './useTimer'
+import { TimerControllerService } from '@/infrastructure/api/generated/services/TimerControllerService'
+import { TimerRequestDto } from '@/infrastructure/api/generated/models/TimerRequestDto'
 
 export const usePomodoroController = () => {
     const dispatch = useDispatch()
@@ -88,15 +92,20 @@ export const usePomodoroController = () => {
 
     const getDurationForMode = useCallback(
         (mode: Mode): number => {
+            let duration: number;
             switch (mode) {
                 case 'SHORT_BREAK':
-                    return settings.shortBreakDuration
+                    duration = settings.shortBreakLength;
+                    break;
                 case 'LONG_BREAK':
-                    return settings.longBreakDuration
+                    duration = settings.longBreakLength;
+                    break;
                 case 'FOCUS':
                 default:
-                    return settings.focusDuration
+                    duration = settings.pomodoroLength;
+                    break;
             }
+            return Number.isFinite(duration) && duration > 0 ? duration : 25;
         },
         [settings]
     )
@@ -124,18 +133,48 @@ export const usePomodoroController = () => {
         isSessionLoaded
     ])
 
-    const handleTimerComplete = useCallback(() => {
+    const handleStartTimer = useCallback(async (mode: Mode, duration: number) => {
+        dispatch(startTimer());
+        
+        try {
+            const modeMap: Record<Mode, TimerRequestDto.mode> = {
+                'FOCUS': TimerRequestDto.mode.POMODORO,
+                'SHORT_BREAK': TimerRequestDto.mode.SHORT_BREAK,
+                'LONG_BREAK': TimerRequestDto.mode.LONG_BREAK
+            };
+            
+            const res = await TimerControllerService.createTimer({
+                duration: duration,
+                mode: modeMap[mode]
+            });
+            
+            if (res.id) {
+                dispatch(setServerId(res.id));
+            }
+        } catch (error) {
+            console.error("Failed to create timer in backend:", error);
+        }
+    }, [dispatch]);
+
+    const handleTimerComplete = useCallback(async () => {
+        if (timerState.serverId) {
+            try {
+                await TimerControllerService.completeTimer(timerState.serverId);
+            } catch (error) {
+                console.error("Failed to complete timer in backend:", error);
+            }
+        }
+
         let nextMode: Mode = 'FOCUS'
-        let nextDuration = settings.focusDuration
         let shouldAutoStart = false
 
         if (timerState.mode === 'FOCUS') {
+            gamificationService.checkAchievements().catch(console.error);
+
             if (currentRound >= settings.longBreakInterval) {
                 nextMode = 'LONG_BREAK'
-                nextDuration = settings.longBreakDuration
             } else {
                 nextMode = 'SHORT_BREAK'
-                nextDuration = settings.shortBreakDuration
             }
 
             shouldAutoStart = settings.autoStartBreaks
@@ -147,18 +186,18 @@ export const usePomodoroController = () => {
             )
 
             nextMode = 'FOCUS'
-            nextDuration = settings.focusDuration
             shouldAutoStart = settings.autoStartPomodoros
         }
 
+        const nextDuration = getDurationForMode(nextMode)
         dispatch(updateDurations({ mode: nextMode, duration: nextDuration }))
 
         if (shouldAutoStart) {
             window.setTimeout(() => {
-                dispatch(startTimer())
+                handleStartTimer(nextMode, nextDuration);
             }, 1200)
         }
-    }, [settings, timerState.mode, currentRound, dispatch])
+    }, [settings, timerState.mode, timerState.serverId, currentRound, dispatch, handleStartTimer, getDurationForMode])
 
     useTimer(handleTimerComplete)
 
@@ -204,8 +243,8 @@ export const usePomodoroController = () => {
             return
         }
 
-        dispatch(startTimer())
-    }, [dispatch, timerState.isActive, timerState.isPaused])
+        handleStartTimer(timerState.mode, timerState.initialTime / 60);
+    }, [dispatch, timerState.isActive, timerState.isPaused, timerState.mode, timerState.initialTime, handleStartTimer])
 
     const resetSession = useCallback(() => {
         const duration = getDurationForMode(timerState.mode)

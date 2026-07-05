@@ -39,20 +39,20 @@ export const TimerDial: React.FC<TimerDialProps> = memo(({ controller }) => {
 
     return (
         <div className="timer-dial">
-            <svg className="drop-shadow-[0_0_22px_rgba(0,0,0,0.45)] w-full h-full -rotate-90 transform">
+            <svg className="drop-shadow-[0_0_22px_rgba(0,0,0,0.45)] w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
                 <circle
-                    cx="50%"
-                    cy="50%"
-                    r="45%"
+                    cx="50"
+                    cy="50"
+                    r="45"
                     className="opacity-10 fill-none"
                     style={{ stroke: 'var(--color-accent)' }}
                     strokeWidth="1.5"
                 />
 
                 <motion.circle
-                    cx="50%"
-                    cy="50%"
-                    r="45%"
+                    cx="50"
+                    cy="50"
+                    r="45"
                     className="fill-none"
                     style={{
                         stroke: 'var(--color-accent)',
@@ -66,12 +66,12 @@ export const TimerDial: React.FC<TimerDialProps> = memo(({ controller }) => {
                 />
             </svg>
 
-            <div className="absolute flex flex-col items-center px-4 max-w-full">
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-4 max-w-full">
                 <div className="timer-digits flex items-center font-black text-white italic leading-none tracking-tighter">
                     {minutes}
                     <span
                         style={{ color: 'var(--color-accent)' }}
-                        className={`mx-0.5 sm:mx-1 ${timerState.isActive ? 'animate-pulse' : ''}`}
+                        className={`mx-1.5 sm:mx-2.5 ${timerState.isActive ? 'animate-pulse' : ''}`}
                     >
                         :
                     </span>
