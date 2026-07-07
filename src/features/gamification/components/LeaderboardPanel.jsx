@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Medal, Award } from 'lucide-react';
 import { gamificationService } from '../api/gamification.api';
+import { useTranslation } from 'react-i18next';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -17,6 +18,7 @@ const itemVariants = {
 };
 
 const LeaderboardPanel = () => {
+  const { t } = useTranslation();
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +49,7 @@ const LeaderboardPanel = () => {
   return (
     <div className="w-full mt-6 sm:mt-10">
       <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-        <h3 className="text-lg sm:text-xl font-black uppercase tracking-widest text-white/90">Leaderboard</h3>
+        <h3 className="text-lg sm:text-xl font-black uppercase tracking-widest text-white/90">{t('gamification.leaderboard')}</h3>
         <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent" />
       </div>
 
@@ -57,7 +59,7 @@ const LeaderboardPanel = () => {
         </div>
       ) : leaderboard.length === 0 ? (
         <div className="text-center py-10 text-white/40 font-bold uppercase tracking-widest text-sm">
-            No rankings available
+            {t('gamification.noRankings')}
         </div>
       ) : (
         <motion.div 

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Tag as TagIcon, ChevronDown, Check, Trash2, Edit2, X } from 'lucide-react';
 import { useTags } from '@/features/tags/hooks/useTags';
+import { useTranslation } from 'react-i18next';
 
 interface TagSelectorProps {
     selectedTagId: string | null;
@@ -8,6 +9,7 @@ interface TagSelectorProps {
 }
 
 const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag }) => {
+    const { t } = useTranslation();
     const { tags, removeTag, updateTag } = useTags();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -72,7 +74,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
                         </div>
                     ) : (
                         <span className="font-bold text-white/20 text-xs uppercase tracking-widest">
-                            Select Category
+                            {t('tags.selectCategory')}
                         </span>
                     )}
                 </div>
@@ -93,7 +95,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
                         className="flex justify-between items-center hover:bg-white/5 px-3 py-2.5 rounded-xl transition-colors"
                     >
                         <span className="font-bold text-white/30 text-xs uppercase tracking-widest">
-                            No Category
+                            {t('tags.noCategory')}
                         </span>
                         {!selectedTagId && <Check size={14} className="text-white/30" />}
                     </button>
@@ -179,9 +181,11 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
                                                 type="button"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    removeTag(tag.id);
-                                                    if (selectedTagId === tag.id) {
-                                                        onSelectTag(null);
+                                                    if(window.confirm(t('tags.deleteConfirm'))) {
+                                                        removeTag(tag.id);
+                                                        if (selectedTagId === tag.id) {
+                                                            onSelectTag(null);
+                                                        }
                                                     }
                                                 }}
                                                 className="p-1 text-white/20 hover:text-red-500 hover:scale-115 transition-all cursor-pointer"

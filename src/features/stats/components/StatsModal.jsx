@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, Target, Zap, CheckCircle2 } from 'lucide-react';
 import { useSelector } from 'react-redux';
-
+import { useTranslation } from 'react-i18next';
 import { gamificationService } from '../../gamification/api/gamification.api';
 
 const StatCard = ({ icon, label, value, sublabel }) => (
@@ -22,6 +22,7 @@ const StatCard = ({ icon, label, value, sublabel }) => (
 );
 
 const StatsModal = ({ isOpen, onClose }) => {
+    const { t } = useTranslation();
     const user = useSelector((state) => state.auth.user);
     const [stats, setStats] = React.useState(null);
     const [loading, setLoading] = React.useState(false);
@@ -65,7 +66,7 @@ const StatsModal = ({ isOpen, onClose }) => {
 
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-8 md:p-12 custom-scrollbar">
                     <h2 className="font-display font-black text-4xl text-white mb-8 tracking-tight">
-                        Insights
+                        {t('stats.insights')}
                     </h2>
 
                     {loading ? (
@@ -76,27 +77,27 @@ const StatsModal = ({ isOpen, onClose }) => {
                         <div className="gap-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                             <StatCard
                                 icon={<Target className="text-emerald-400" />}
-                                label="Pomodoros"
+                                label={t('stats.pomodoros')}
                                 value={stats?.pomodorosCompleted || 0}
-                                sublabel="Completed"
+                                sublabel={t('stats.completed')}
                             />
                             <StatCard
                                 icon={<Zap className="text-amber-400" />}
-                                label="Current Streak"
-                                value={`${stats?.currentStreak || 0} Days`}
-                                sublabel={`Best: ${stats?.longestStreak || 0} Days`}
+                                label={t('stats.currentStreak')}
+                                value={`${stats?.currentStreak || 0} ${t('stats.days')}`}
+                                sublabel={`${t('stats.best')}: ${stats?.longestStreak || 0} ${t('stats.days')}`}
                             />
                             <StatCard
                                 icon={<Clock className="text-blue-400" />}
-                                label="Level"
+                                label={t('stats.level')}
                                 value={stats?.level || 1}
-                                sublabel="Current rank"
+                                sublabel={t('stats.currentRank')}
                             />
                             <StatCard
                                 icon={<Target className="text-purple-400" />}
-                                label="Experience"
+                                label={t('stats.experience')}
                                 value={stats?.experience || 0}
-                                sublabel="Total XP"
+                                sublabel={t('stats.totalXp')}
                             />
                         </div>
                     )}

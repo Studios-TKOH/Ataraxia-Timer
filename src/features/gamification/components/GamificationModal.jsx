@@ -1,10 +1,12 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trophy, Medal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AchievementsPanel from './AchievementsPanel';
 import LeaderboardPanel from './LeaderboardPanel';
 
 const GamificationModal = ({ isOpen, onClose }) => {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = React.useState('achievements');
 
     return (
@@ -45,8 +47,7 @@ const GamificationModal = ({ isOpen, onClose }) => {
                             }`}
                         >
                             <Trophy size={14} className="sm:w-4 sm:h-4" />
-                            <span className="hidden xs:inline">Achievements</span>
-                            <span className="xs:hidden">Logros</span>
+                            <span>{t('gamification.achievements')}</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('leaderboard')}
@@ -57,8 +58,7 @@ const GamificationModal = ({ isOpen, onClose }) => {
                             }`}
                         >
                             <Medal size={14} className="sm:w-4 sm:h-4" />
-                            <span className="hidden xs:inline">Leaderboard</span>
-                            <span className="xs:hidden">Ranking</span>
+                            <span>{t('gamification.leaderboard')}</span>
                         </button>
                     </div>
 

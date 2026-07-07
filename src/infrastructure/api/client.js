@@ -1,4 +1,5 @@
 import axios from 'axios';
+import rateLimit from 'axios-rate-limit';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -6,13 +7,13 @@ if (!API_URL) {
     console.warn('VITE_API_URL is not defined');
 }
 
-const api = axios.create({
+const api = rateLimit(axios.create({
     baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
     withCredentials: true,
-});
+}), { maxRequests: 10, perMilliseconds: 1000, maxRPS: 10 }); // Limit to 10 requests per second
 
 function parseJwt(token) {
     try {

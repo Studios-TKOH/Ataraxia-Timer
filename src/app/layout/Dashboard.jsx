@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Play, Pause, RotateCcw } from 'lucide-react';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import { usePomodoroController } from '@/features/pomodoro/hooks/usePomodoroController';
 import { usePipController } from '@/features/pomodoro/hooks/usePipController';
@@ -36,6 +37,7 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
     const pomodoro = usePomodoroController();
     const pip = usePipController();
 
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const triggerPaintRef = useRef(null);
 
@@ -119,9 +121,9 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
 
                             <div className="mode-tabs">
                                 {[
-                                    { label: 'Focus', value: 'FOCUS' },
-                                    { label: 'Short', value: 'SHORT_BREAK' },
-                                    { label: 'Long', value: 'LONG_BREAK' },
+                                    { label: t('dashboard.focus'), value: 'FOCUS' },
+                                    { label: t('dashboard.shortBreak'), value: 'SHORT_BREAK' },
+                                    { label: t('dashboard.longBreak'), value: 'LONG_BREAK' },
                                 ].map((item) => {
                                     const isActive = pomodoro.mode === item.value;
 
@@ -165,12 +167,12 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
                                     {pomodoro.isActive ? (
                                         <>
                                             <Pause size={19} fill="currentColor" />
-                                            PAUSE
+                                            {t('dashboard.pause')}
                                         </>
                                     ) : (
                                         <>
                                             <Play size={19} fill="currentColor" />
-                                            START
+                                            {t('dashboard.start')}
                                         </>
                                     )}
                                 </button>

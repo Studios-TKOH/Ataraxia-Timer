@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User as UserIcon, ArrowRight, Loader2, KeyRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import {
   loginRequest,
   registerRequest,
@@ -146,6 +147,21 @@ const AuthForm = ({ isLogin, toggleMode }) => {
             </>
           )}
         </motion.button>
+
+        {!isLogin && (
+          <div className="text-center mt-2">
+            <p className="text-[10px] text-white/30 uppercase tracking-[0.2em]">
+              By registering, you agree to our{' '}
+              <Link to="/terms" className="underline hover:text-white/60 transition-colors" target="_blank">
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link to="/privacy" className="underline hover:text-white/60 transition-colors" target="_blank">
+                Privacy Policy
+              </Link>
+            </p>
+          </div>
+        )}
       </form>
 
       <div className="mt-10 pt-8 border-white/5 border-t text-center">

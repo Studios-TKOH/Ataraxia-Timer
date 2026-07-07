@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Tag as TagIcon, Hash, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#a3a3a3'];
 
 const TagInput = ({ tagName, setTagName, tagColor, setTagColor }) => {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
     useEffect(() => {
@@ -24,7 +26,7 @@ const TagInput = ({ tagName, setTagName, tagColor, setTagColor }) => {
                     type="text"
                     value={tagName}
                     onChange={(e) => setTagName(e.target.value)}
-                    placeholder="Tag name"
+                    placeholder={t('tags.tagName')}
                     className="bg-transparent outline-none w-full font-black text-white placeholder:text-white/20 text-xs uppercase tracking-widest"
                 />
             </div>

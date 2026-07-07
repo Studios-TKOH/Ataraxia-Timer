@@ -17,12 +17,14 @@ import {
     Trash2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { sanitizeImageUrl } from '@/shared/utils/sanitize';
 
 const ProfileView = () => {
     const user = useSelector((state) => state.auth.user);
     const authStatus = useSelector((state) => state.auth.status);
     const dispatch = useDispatch();
+    const { t } = useTranslation();
 
     const [isEditing, setIsEditing] = useState(false);
     const [newUsername, setNewUsername] = useState('');
@@ -52,12 +54,12 @@ const ProfileView = () => {
         const cleanAvatar = newAvatar.trim();
 
         if (cleanUsername.length < 3) {
-            toast.error('Username too short');
+            toast.error(t('profile.usernameShort'));
             return;
         }
 
         if (cleanAvatar && !sanitizeImageUrl(cleanAvatar)) {
-            toast.error('Invalid image URL (use https://)');
+            toast.error(t('profile.invalidUrl'));
             return;
         }
 
@@ -78,11 +80,11 @@ const ProfileView = () => {
             }
             
             dispatch(updateUser(mergedUser));
-            toast.success('Profile updated successfully');
+            toast.success(t('profile.updateSuccess'));
             setIsEditing(false);
         } catch (error) {
             console.error("Failed to update profile", error);
-            toast.error('Failed to update profile');
+            toast.error(t('profile.updateFailed'));
         }
     };
 
@@ -98,7 +100,7 @@ const ProfileView = () => {
     };
 
     const handleDeleteAccount = async () => {
-        const password = window.prompt("To delete your account, please enter your password:");
+        const password = window.prompt(t('profile.deletePrompt'));
         if (password) {
             try {
                 await userService.deleteAccount({ confirmationPassword: password });
@@ -107,7 +109,7 @@ const ProfileView = () => {
                 window.location.reload();
             } catch (error) {
                 console.error("Failed to delete account", error);
-                toast.error("Failed to delete account. Incorrect password?");
+                toast.error(t('profile.deleteFailed'));
             }
         }
     };
@@ -116,7 +118,7 @@ const ProfileView = () => {
         return (
             <div className="flex justify-center items-center w-full min-h-[60vh]">
                 <div className="font-black text-[10px] text-white/30 uppercase tracking-[0.3em]">
-                    Loading profile...
+                    {t('profile.loading')}
                 </div>
             </div>
         );
@@ -156,7 +158,7 @@ const ProfileView = () => {
                                     type="text"
                                     value={newUsername}
                                     onChange={(e) => setNewUsername(e.target.value)}
-                                    placeholder="Username"
+                                    placeholder={t('profile.usernamePlaceholder')}
                                     className="bg-white/5 px-4 py-1 border border-accent/50 rounded-xl outline-none font-black text-white text-2xl uppercase tracking-wider"
                                     autoFocus
                                 />
@@ -164,7 +166,7 @@ const ProfileView = () => {
                                     type="text"
                                     value={newAvatar}
                                     onChange={(e) => setNewAvatar(e.target.value)}
-                                    placeholder="Avatar Image URL"
+                                    placeholder={t('profile.avatarPlaceholder')}
                                     className="bg-white/5 px-4 py-1 border border-white/10 rounded-xl outline-none text-white/70 text-sm"
                                 />
                             </div>
@@ -192,7 +194,7 @@ const ProfileView = () => {
                 <div className="bg-white/5 p-6 border border-white/5 rounded-[2rem] min-w-[200px]">
                     <div className="flex justify-between items-end mb-2">
                         <span className="font-black text-[10px] text-accent uppercase tracking-widest">
-                            Level {currentLevel}
+                            {t('profile.level')} {currentLevel}
                         </span>
 
                         <span className="font-bold text-[10px] text-white/20 uppercase">
@@ -216,14 +218,14 @@ const ProfileView = () => {
                     className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-sm bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-all"
                 >
                     <LogOut size={16} />
-                    Logout
+                    {t('profile.logout')}
                 </button>
                 <button
                     onClick={handleDeleteAccount}
                     className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all border border-red-500/20"
                 >
                     <Trash2 size={16} />
-                    Delete Account
+                    {t('profile.deleteAccount')}
                 </button>
             </div>
         </motion.div>
