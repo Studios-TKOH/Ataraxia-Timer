@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
-import CookieConsent from './CookieConsent';
+import CookieConsent from '@/app/components/CookieConsent';
 import { vi } from 'vitest';
 
 describe('CookieConsent', () => {

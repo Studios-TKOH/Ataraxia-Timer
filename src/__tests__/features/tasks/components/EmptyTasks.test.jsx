@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import EmptyTasks from './EmptyTasks';
+import EmptyTasks from '@/features/tasks/components/EmptyTasks';
 
 describe('EmptyTasks', () => {
     it('renders the empty tasks state correctly', () => {

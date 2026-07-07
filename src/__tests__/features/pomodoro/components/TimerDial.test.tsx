@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
-import { TimerDial } from './TimerDial';
+import { TimerDial } from '@/features/pomodoro/components/TimerDial';
 
 const mockStore = configureStore([]);
 

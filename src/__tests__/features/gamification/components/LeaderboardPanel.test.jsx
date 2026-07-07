@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import LeaderboardPanel from './LeaderboardPanel';
-import { gamificationService } from '../api/gamification.api';
+import LeaderboardPanel from '@/features/gamification/components/LeaderboardPanel';
+import { gamificationService } from '@/features/gamification/api/gamification.api';
 
 // Mock translation hook
 vi.mock('react-i18next', () => ({
@@ -12,7 +12,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 // Mock gamification service
-vi.mock('../api/gamification.api', () => ({
+vi.mock('@/features/gamification/api/gamification.api', () => ({
   gamificationService: {
     getLeaderboard: vi.fn(),
   },

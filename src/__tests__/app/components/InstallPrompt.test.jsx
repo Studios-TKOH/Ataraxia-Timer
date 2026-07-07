@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
-import InstallPrompt from './InstallPrompt';
+import InstallPrompt from '@/app/components/InstallPrompt';
 import { vi } from 'vitest';
 import * as reactRedux from 'react-redux';
 import * as useInstallPromptModule from '@/shared/hooks/useInstallPrompt';
