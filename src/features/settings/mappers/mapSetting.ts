@@ -1,41 +1,26 @@
 import { SettingModel } from "../types/setting.model"
 import { SettingResponseDto } from "../types/setting.dto"
-
-const DEFAULTS = {
-    pomodoroLength: 25,
-    shortBreakLength: 5,
-    longBreakLength: 15,
-    longBreakInterval: 4,
-    autoStartBreaks: false,
-    autoStartPomodoros: false,
-    soundEnabled: true,
-    volume: 50,
-    theme: "dark" as const,
-    language: "en",
-    timeFormat: "24h" as const,
-    weekStart: "monday" as const,
-    notificationsEnabled: true,
-}
+import { SETTINGS_DEFAULTS } from "../constants/settings.constants"
 
 export function mapSettingDtoToModel(dto: SettingResponseDto): SettingModel {
     return {
         id: dto.id,
 
-        pomodoroLength: dto.pomodoroLength ?? DEFAULTS.pomodoroLength,
-        shortBreakLength: dto.shortBreakLength ?? DEFAULTS.shortBreakLength,
-        longBreakLength: dto.longBreakLength ?? DEFAULTS.longBreakLength,
-        longBreakInterval: dto.longBreakInterval ?? DEFAULTS.longBreakInterval,
+        pomodoroLength: dto.pomodoroLength ?? SETTINGS_DEFAULTS.pomodoroLength,
+        shortBreakLength: dto.shortBreakLength ?? SETTINGS_DEFAULTS.shortBreakLength,
+        longBreakLength: dto.longBreakLength ?? SETTINGS_DEFAULTS.longBreakLength,
+        longBreakInterval: dto.longBreakInterval ?? SETTINGS_DEFAULTS.longBreakInterval,
 
-        autoStartBreaks: dto.autoStartBreaks ?? DEFAULTS.autoStartBreaks,
-        autoStartPomodoros: dto.autoStartPomodoros ?? DEFAULTS.autoStartPomodoros,
+        autoStartBreaks: dto.autoStartBreaks ?? SETTINGS_DEFAULTS.autoStartBreaks,
+        autoStartPomodoros: dto.autoStartPomodoros ?? SETTINGS_DEFAULTS.autoStartPomodoros,
 
-        soundEnabled: dto.soundEnabled ?? DEFAULTS.soundEnabled,
-        volume: dto.volume ?? DEFAULTS.volume,
-        theme: dto.theme ?? DEFAULTS.theme,
-        language: dto.language ?? DEFAULTS.language,
-        timeFormat: dto.timeFormat ?? DEFAULTS.timeFormat,
-        weekStart: dto.weekStart ?? DEFAULTS.weekStart,
-        notificationsEnabled: dto.notificationsEnabled ?? DEFAULTS.notificationsEnabled,
+        soundEnabled: dto.soundEnabled ?? SETTINGS_DEFAULTS.soundEnabled,
+        volume: dto.volume ?? SETTINGS_DEFAULTS.volume,
+        theme: dto.theme ?? SETTINGS_DEFAULTS.theme,
+        language: dto.language ?? SETTINGS_DEFAULTS.language,
+        timeFormat: dto.timeFormat ?? SETTINGS_DEFAULTS.timeFormat,
+        weekStart: dto.weekStart ?? SETTINGS_DEFAULTS.weekStart,
+        notificationsEnabled: dto.notificationsEnabled ?? SETTINGS_DEFAULTS.notificationsEnabled,
 
         syncStatus: 'synced',
         updatedAt: Date.now()
