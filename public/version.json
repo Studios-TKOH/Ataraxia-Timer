@@ -1,14 +1,14 @@
 {
-  "version": "2.0.0-dc26bb4",
+  "version": "2.0.0-ef85f91",
   "appVersion": "2.0.0",
-  "build": "dc26bb4",
-  "date": "2026-07-10T02:22:23.048Z",
+  "build": "ef85f91",
+  "date": "2026-07-10T02:45:31.112Z",
   "changelog": [
-    "Improved (api): Move JWT parsing & expiration check functions for better organization",
-    "Task management improvements",
-    "New (stats): Login prompt for unauthenticated users in StatsModal",
-    "New (profile): Login prompt for unauthenticated users in ProfileView",
-    "Achievements and leaderboard"
+    "chore (version): Version, build, & changelog for release 2.0.0-dc26bb4",
+    "New (translations): English & Spanish translation constants for UI elements",
+    "Tag display fixes",
+    "Improved (tags): Import TAG_POLL_INTERVAL from constants for better configuration management",
+    "chore (translations): English & Spanish translation files"
   ],
   "targetUrl": "/"
 }

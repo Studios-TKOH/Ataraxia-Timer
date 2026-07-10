@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { TEXTS } from '@/shared/constants/texts.constants';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
 import { useTags } from '@/features/tags/hooks/useTags';
 import TagInput from '../../tags/components/TagInput';
@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 
 const TaskManager = () => {
-  const { t } = useTranslation();
   const { tasks, loading, addTask, toggleTask, removeTask, updateTask } = useTasks();
   const { tags, addTag, updateTag } = useTags();
 
@@ -95,7 +94,7 @@ const TaskManager = () => {
       <div className="flex justify-between items-center mb-3 2xl:mb-4 px-1 shrink-0">
         <h2 className="flex items-center gap-2.5 2xl:gap-3 font-black text-white text-[11px] 2xl:text-sm uppercase tracking-[0.18em] sm:tracking-[0.2em] min-w-0">
           <span className="bg-[#00ffd5] shadow-[0_0_10px_#00ffd5] rounded-full w-2 h-2 shrink-0" />
-          <span className="truncate">{t('tasks.missionLog')}</span>
+          <span className="truncate">{TEXTS.tasks.missionLog}</span>
         </h2>
 
         <Settings2
@@ -109,7 +108,7 @@ const TaskManager = () => {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder={t('tasks.nextObjective')}
+          placeholder={TEXTS.tasks.nextObjective}
           className="bg-black/40 shadow-inner px-4 py-3 2xl:py-3.5 border border-white/5 focus:border-[#00ffd5]/30 rounded-2xl focus:outline-none w-full text-white placeholder:text-white/10 text-sm"
           maxLength={40}
         />
@@ -122,7 +121,7 @@ const TaskManager = () => {
               className="flex justify-center items-center gap-2 border-white/5 hover:border-white/10 bg-black/40 py-3 border rounded-2xl w-full font-bold text-white/50 hover:text-white/80 text-xs uppercase transition-all tracking-widest"
             >
               <Plus size={14} />
-              {t('tags.addTag', 'Add category')}
+              {TEXTS.tags.addTag}
             </button>
           ) : (
             <TagInput
@@ -153,7 +152,7 @@ const TaskManager = () => {
         <div className="flex items-center gap-2">
           <div className="flex flex-1 justify-between items-center bg-black/40 px-3 py-2 2xl:py-2.5 border border-white/5 rounded-2xl min-w-0">
             <span className="font-black text-[8px] xs:text-[9px] text-white/20 uppercase tracking-widest truncate">
-              {t('tasks.estPomos')}
+              {TEXTS.tasks.estPomos}
             </span>
 
             <div className="flex items-center gap-2 font-bold text-white shrink-0">

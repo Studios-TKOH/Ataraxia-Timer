@@ -2,7 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { sanitizeForCss } from '@/shared/utils/sanitize';
-import { useTranslation } from 'react-i18next';
+import { TEXTS } from '@/shared/constants/texts.constants';
 
 export interface PipPortalProps {
     pipWindow: Window;
@@ -34,7 +34,6 @@ export const PipPortal: React.FC<PipPortalProps> = ({
     toggleSession,
     resetSession
 }) => {
-    const { t } = useTranslation();
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     const totalSeconds = initialTime || 1500;
@@ -120,7 +119,7 @@ export const PipPortal: React.FC<PipPortalProps> = ({
                 borderRadius: '50px',
                 border: '1px solid rgba(255,255,255,0.05)'
             }}>
-                {t('dashboard.round')} {currentRound} / {longBreakInterval}
+                {TEXTS.dashboard.round} {currentRound} / {longBreakInterval}
             </div>
 
             <div style={{

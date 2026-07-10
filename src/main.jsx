@@ -8,7 +8,6 @@ import '@/infrastructure/api/openapi-init'
 import { store } from '@store/index'
 import App from '@/App'
 import { startVersionGuard } from '@/shared/version/startVersionGuard'
-import './i18n'
 import './index.css'
 
 registerSW({

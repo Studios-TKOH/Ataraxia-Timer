@@ -1,13 +1,12 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trophy, Medal, Lock } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { TEXTS } from '@/shared/constants/texts.constants';
 import { useSelector } from 'react-redux';
 import AchievementsPanel from './AchievementsPanel';
 import LeaderboardPanel from './LeaderboardPanel';
 
 const GamificationModal = ({ isOpen, onClose }) => {
-    const { t } = useTranslation();
     const user = useSelector((state) => state.auth.user);
     const [activeTab, setActiveTab] = React.useState('achievements');
 
@@ -49,7 +48,7 @@ const GamificationModal = ({ isOpen, onClose }) => {
                             }`}
                         >
                             <Trophy size={14} className="sm:w-4 sm:h-4" />
-                            <span>{t('gamification.achievements')}</span>
+                            <span>{TEXTS.gamification.achievements}</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('leaderboard')}
@@ -60,7 +59,7 @@ const GamificationModal = ({ isOpen, onClose }) => {
                             }`}
                         >
                             <Medal size={14} className="sm:w-4 sm:h-4" />
-                            <span>{t('gamification.leaderboard')}</span>
+                            <span>{TEXTS.gamification.leaderboard}</span>
                         </button>
                     </div>
 
@@ -75,8 +74,8 @@ const GamificationModal = ({ isOpen, onClose }) => {
                                 className="flex flex-col items-center justify-center p-12 text-center"
                             >
                                 <Lock size={48} className="text-white/20 mb-4 mx-auto" />
-                                <h3 className="text-white font-bold text-xl mb-2">{t('auth.loginRequired', 'Debes iniciar sesión')}</h3>
-                                <p className="text-white/50 text-sm">{t('stats.loginToView', 'Para ver logros y estadísticas necesitas una cuenta.')}</p>
+                                <h3 className="text-white font-bold text-xl mb-2">{TEXTS.auth.loginRequired}</h3>
+                                <p className="text-white/50 text-sm">{TEXTS.stats.loginToView}</p>
                             </motion.div>
                         ) : activeTab === 'achievements' ? (
                             <motion.div

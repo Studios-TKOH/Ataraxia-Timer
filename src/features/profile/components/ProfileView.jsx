@@ -18,14 +18,13 @@ import {
     Lock,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next';
+import { TEXTS } from '@/shared/constants/texts.constants';
 import { sanitizeImageUrl } from '@/shared/utils/sanitize';
 
 const ProfileView = () => {
     const user = useSelector((state) => state.auth.user);
     const authStatus = useSelector((state) => state.auth.status);
     const dispatch = useDispatch();
-    const { t } = useTranslation();
 
     const [isEditing, setIsEditing] = useState(false);
     const [newUsername, setNewUsername] = useState('');
@@ -55,12 +54,12 @@ const ProfileView = () => {
         const cleanAvatar = newAvatar.trim();
 
         if (cleanUsername.length < 3) {
-            toast.error(t('profile.usernameShort'));
+            toast.error(TEXTS.profile.usernameShort);
             return;
         }
 
         if (cleanAvatar && !sanitizeImageUrl(cleanAvatar)) {
-            toast.error(t('profile.invalidUrl'));
+            toast.error(TEXTS.profile.invalidUrl);
             return;
         }
 
@@ -81,11 +80,11 @@ const ProfileView = () => {
             }
             
             dispatch(updateUser(mergedUser));
-            toast.success(t('profile.updateSuccess'));
+            toast.success(TEXTS.profile.updateSuccess);
             setIsEditing(false);
         } catch (error) {
             console.error("Failed to update profile", error);
-            toast.error(t('profile.updateFailed'));
+            toast.error(TEXTS.profile.updateFailed);
         }
     };
 
@@ -101,7 +100,7 @@ const ProfileView = () => {
     };
 
     const handleDeleteAccount = async () => {
-        const password = window.prompt(t('profile.deletePrompt'));
+        const password = window.prompt(TEXTS.profile.deletePrompt);
         if (password) {
             try {
                 await userService.deleteAccount({ confirmationPassword: password });
@@ -110,7 +109,7 @@ const ProfileView = () => {
                 window.location.reload();
             } catch (error) {
                 console.error("Failed to delete account", error);
-                toast.error(t('profile.deleteFailed'));
+                toast.error(TEXTS.profile.deleteFailed);
             }
         }
     };
@@ -119,7 +118,7 @@ const ProfileView = () => {
         return (
             <div className="flex justify-center items-center w-full min-h-[60vh]">
                 <div className="font-black text-[10px] text-white/30 uppercase tracking-[0.3em]">
-                    {t('profile.loading')}
+                    {TEXTS.profile.loading}
                 </div>
             </div>
         );
@@ -133,8 +132,8 @@ const ProfileView = () => {
                 className="flex flex-col items-center justify-center min-h-[60vh] text-center"
             >
                 <Lock size={48} className="text-white/20 mb-4 mx-auto" />
-                <h3 className="text-white font-bold text-xl mb-2">{t('auth.loginRequired', 'You must log in')}</h3>
-                <p className="text-white/50 text-sm">{t('profile.loginToView', 'To view your profile, you need an account.')}</p>
+                <h3 className="text-white font-bold text-xl mb-2">{TEXTS.auth.loginRequired}</h3>
+                <p className="text-white/50 text-sm">{TEXTS.profile.loginToView}</p>
             </motion.div>
         );
     }
@@ -173,17 +172,17 @@ const ProfileView = () => {
                                     type="text"
                                     value={newUsername}
                                     onChange={(e) => setNewUsername(e.target.value)}
-                                    placeholder={t('profile.usernamePlaceholder')}
+                                    placeholder={TEXTS.profile.usernamePlaceholder}
                                     className="bg-white/5 px-4 py-1 border border-accent/50 rounded-xl outline-none font-black text-white text-2xl uppercase tracking-wider"
                                     autoFocus
-                                />
+                                  />
                                 <input
                                     type="text"
                                     value={newAvatar}
                                     onChange={(e) => setNewAvatar(e.target.value)}
-                                    placeholder={t('profile.avatarPlaceholder')}
+                                    placeholder={TEXTS.profile.avatarPlaceholder}
                                     className="bg-white/5 px-4 py-1 border border-white/10 rounded-xl outline-none text-white/70 text-sm"
-                                />
+                                  />
                             </div>
                         ) : (
                             <h2 className="font-black text-white text-3xl uppercase tracking-[0.1em]">
@@ -209,7 +208,7 @@ const ProfileView = () => {
                 <div className="bg-white/5 p-6 border border-white/5 rounded-[2rem] min-w-[200px]">
                     <div className="flex justify-between items-end mb-2">
                         <span className="font-black text-[10px] text-accent uppercase tracking-widest">
-                            {t('profile.level')} {currentLevel}
+                            {TEXTS.profile.level} {currentLevel}
                         </span>
 
                         <span className="font-bold text-[10px] text-white/20 uppercase">
@@ -233,14 +232,14 @@ const ProfileView = () => {
                     className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-sm bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-all"
                 >
                     <LogOut size={16} />
-                    {t('profile.logout')}
+                    {TEXTS.profile.logout}
                 </button>
                 <button
                     onClick={handleDeleteAccount}
                     className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all border border-red-500/20"
                 >
                     <Trash2 size={16} />
-                    {t('profile.deleteAccount')}
+                    {TEXTS.profile.deleteAccount}
                 </button>
             </div>
         </motion.div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { Bell, BellOff, LogOut, Clock, Download, User, ShieldCheck, Loader2, Menu } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutRequest } from '@/features/auth/store/authSlice';
-import { useTranslation } from 'react-i18next';
+import { TEXTS } from '@/shared/constants/texts.constants';
 import { useNotifications } from '@/shared/hooks/useNotifications';
 import { useInstallPrompt } from '@/shared/hooks/useInstallPrompt';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -13,7 +13,6 @@ const AuthModal = React.lazy(() => import('@/features/auth/components/AuthModal'
 
 const Header = ({ is24Hour = false, accentColor = '#14b8a6', onOpenSidebar = () => { }, onOpenProfile = () => { } }) => {
   const dispatch = useDispatch();
-  const { t } = useTranslation();
   const { permission, requestPermission } = useNotifications();
   const { isInstallable, handleInstallClick } = useInstallPrompt();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -71,7 +70,7 @@ const Header = ({ is24Hour = false, accentColor = '#14b8a6', onOpenSidebar = () 
         {isInstallable && (
           <button type="button" onClick={handleInstallClick} className="app-header-install" style={{ color: accentColor, borderColor: `${accentColor}4d` }}>
             <Download size={18} className="animate-bounce shrink-0" />
-            <span className="hidden sm:block ml-3 font-black text-[11px] 2xl:text-sm uppercase">{t('header.install')}</span>
+            <span className="hidden sm:block ml-3 font-black text-[11px] 2xl:text-sm uppercase">{TEXTS.header.install}</span>
           </button>
         )}
 
@@ -113,7 +112,7 @@ const Header = ({ is24Hour = false, accentColor = '#14b8a6', onOpenSidebar = () 
                 </span>
                 <span className="flex items-center gap-1 mt-1 text-[8px] uppercase tracking-tighter" style={{ color: accentColor }}>
                   <ShieldCheck size={10} />
-                  {t('header.verified')}
+                  {TEXTS.header.verified}
                 </span>
               </div>
             </button>

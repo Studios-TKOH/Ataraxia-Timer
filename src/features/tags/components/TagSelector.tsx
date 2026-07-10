@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Tag as TagIcon, ChevronDown, Check, Trash2, Edit2, X } from 'lucide-react';
 import { useTags } from '@/features/tags/hooks/useTags';
-import { useTranslation } from 'react-i18next';
+import { TEXTS } from '@/shared/constants/texts.constants';
 
 interface TagSelectorProps {
     selectedTagId: string | null;
@@ -9,7 +9,6 @@ interface TagSelectorProps {
 }
 
 const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag }) => {
-    const { t } = useTranslation();
     const { tags, removeTag, updateTag } = useTags();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -68,13 +67,13 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
                                     backgroundColor: selectedTag.color || '#5fbfff'
                                 }}
                             />
-                            <span className="font-bold text-white text-xs uppercase tracking-widest">
+                            <span className="font-bold text-white/80 text-xs uppercase tracking-widest">
                                 {selectedTag.name}
                             </span>
                         </div>
                     ) : (
                         <span className="font-bold text-white/20 text-xs uppercase tracking-widest">
-                            {t('tags.selectCategory')}
+                            {TEXTS.tags.selectCategory}
                         </span>
                     )}
                 </div>
@@ -95,7 +94,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
                         className="flex justify-between items-center hover:bg-white/5 px-3 py-2.5 rounded-xl transition-colors"
                     >
                         <span className="font-bold text-white/30 text-xs uppercase tracking-widest">
-                            {t('tags.noCategory')}
+                            {TEXTS.tags.noCategory}
                         </span>
                         {!selectedTagId && <Check size={14} className="text-white/30" />}
                     </button>
@@ -181,7 +180,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
                                                 type="button"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if(window.confirm(t('tags.deleteConfirm'))) {
+                                                    if(window.confirm(TEXTS.tags.deleteConfirm)) {
                                                         removeTag(tag.id);
                                                         if (selectedTagId === tag.id) {
                                                             onSelectTag(null);

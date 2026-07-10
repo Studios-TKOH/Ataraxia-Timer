@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
+import { TEXTS } from '@/shared/constants/texts.constants';
 import toast from 'react-hot-toast';
 import {
   X,
@@ -95,7 +95,6 @@ const clampNumber = (value, fallback = 0) => {
 };
 
 const SettingsModal = ({ isOpen = true, onClose }) => {
-  const { t } = useTranslation();
   const dispatch = useDispatch();
 
   const settings = useSelector((state) => state.settings);
@@ -337,7 +336,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
         <div className="flex justify-between items-center mb-5 sm:mb-6 shrink-0">
           <h2 className="flex items-center gap-3 font-black text-xl xs:text-2xl tracking-tighter min-w-0">
             <span style={{ color: localAccentColor }}>/</span>
-            <span className="truncate">{t('settings.title').toUpperCase()}</span>
+            <span className="truncate">{TEXTS.settings.title.toUpperCase()}</span>
           </h2>
 
           <button
@@ -353,7 +352,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
           <section>
             <div className="flex items-center gap-2 mb-4 font-bold text-[10px] text-white/30 uppercase tracking-[0.24em] sm:tracking-[0.3em]">
               <Clock size={14} />
-              {t('settings.timer')}
+              {TEXTS.settings.timer}
             </div>
 
             <div className="gap-3 sm:gap-4 grid grid-cols-1 xs:grid-cols-3 bg-white/5 p-4 sm:p-6 border border-white/5 rounded-[1.5rem] sm:rounded-[2rem]">
@@ -384,7 +383,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
             <div className="flex justify-between items-center gap-3 mb-4">
               <div className="flex items-center gap-2 font-bold text-[10px] text-white/30 uppercase tracking-[0.24em] sm:tracking-[0.3em] min-w-0">
                 <Keyboard size={14} className="shrink-0" />
-                <span className="truncate">{t('settings.shortcuts')}</span>
+                <span className="truncate">{TEXTS.settings.shortcuts}</span>
               </div>
 
               <button
@@ -393,7 +392,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
                 className="flex items-center gap-1 text-[10px] text-white/30 hover:text-white uppercase tracking-widest shrink-0"
               >
                 <RotateCcw size={12} />
-                {t('settings.reset')}
+                {TEXTS.settings.reset}
               </button>
             </div>
 
@@ -426,7 +425,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
           <section>
             <div className="flex items-center gap-2 mb-4 font-bold text-[10px] text-white/30 uppercase tracking-[0.24em] sm:tracking-[0.3em]">
               <Monitor size={14} />
-              {t('settings.workflow')}
+              {TEXTS.settings.workflow}
             </div>
 
             <div className="space-y-4 bg-white/5 p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem]">
@@ -449,7 +448,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
 
               <div className="flex justify-between items-center gap-4">
                 <span className="text-white/60 text-xs">
-                  {t('settings.autoStartBreaks')}
+                  {TEXTS.settings.autoStartBreaks}
                 </span>
 
                 <Switch
@@ -463,7 +462,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
 
               <div className="flex justify-between items-center gap-4">
                 <span className="text-white/60 text-xs">
-                  {t('settings.autoStartFocus')}
+                  {TEXTS.settings.autoStartFocus}
                 </span>
 
                 <Switch
@@ -477,7 +476,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
 
               <div className="flex justify-between items-center gap-4">
                 <span className="text-white/60 text-xs">
-                  {t('settings.clock24')}
+                  {TEXTS.settings.clock24}
                 </span>
 
                 <Switch
@@ -494,13 +493,13 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
           <section>
             <div className="flex items-center gap-2 mb-4 font-bold text-[10px] text-white/30 uppercase tracking-[0.24em] sm:tracking-[0.3em]">
               <Volume2 size={14} />
-              {t('settings.auditory')}
+              {TEXTS.settings.auditory}
             </div>
 
             <div className="space-y-6 bg-white/5 p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem]">
               <div className="space-y-3">
                 <div className="flex justify-between font-bold text-[10px] text-white/30 uppercase">
-                  <span>{t('settings.masterVolume')}</span>
+                  <span>{TEXTS.settings.masterVolume}</span>
                   <span>{Math.round(localUISettings.volume)}%</span>
                 </div>
 
@@ -524,7 +523,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
                 className="flex justify-center items-center gap-2 bg-white/5 hover:bg-white/10 py-4 rounded-xl w-full font-bold text-[10px] text-white/60 uppercase"
               >
                 <Bell size={14} />
-                {t('settings.testAlarm')}
+                {TEXTS.settings.testAlarm}
               </button>
             </div>
           </section>
@@ -532,13 +531,13 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
           <section>
             <div className="flex items-center gap-2 mb-4 font-bold text-[10px] text-white/30 uppercase tracking-[0.24em] sm:tracking-[0.3em]">
               <Sun size={14} />
-              {t('settings.visual')}
+              {TEXTS.settings.visual}
             </div>
 
             <div className="space-y-6 bg-white/5 p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem]">
               <div className="flex justify-between items-center gap-4 bg-black/20 p-4 border border-white/5 rounded-xl">
                 <span className="text-white/60 text-xs">
-                  {t('settings.accentTheme')}
+                  {TEXTS.settings.accentTheme}
                 </span>
 
                 <div className="relative border-2 border-white/20 rounded-full w-8 h-8 overflow-hidden shrink-0">
@@ -559,7 +558,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
 
               <div className="space-y-3">
                 <div className="flex justify-between font-bold text-[10px] text-white/30 uppercase">
-                  <span>{t('settings.glassBlur')}</span>
+                  <span>{TEXTS.settings.glassBlur}</span>
                   <span>{localUISettings.blurIntensity}%</span>
                 </div>
 
@@ -593,14 +592,14 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
                       document.documentElement.style.removeProperty('--bg-image');
                     }
                   }}
-                  placeholder={t('settings.bgImage')}
+                  placeholder={TEXTS.settings.bgImage}
                   className="bg-black/20 px-4 py-3 border border-white/10 focus:border-white/30 rounded-xl outline-none w-full text-white/80 text-xs"
                 />
 
                 <div className="flex gap-2">
                   <label className="flex flex-1 justify-center items-center gap-2 border border-white/10 hover:border-white/30 border-dashed rounded-xl h-12 text-white/40 text-xs transition-colors cursor-pointer min-w-0">
                     <Upload size={14} className="shrink-0" />
-                    <span className="truncate">{t('settings.uploadFile', { defaultValue: 'Upload File' })}</span>
+                    <span className="truncate">{TEXTS.settings.uploadFile}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -657,7 +656,7 @@ const SettingsModal = ({ isOpen = true, onClose }) => {
             ) : (
               <>
                 <Save size={18} />
-                {t('settings.save').toUpperCase()}
+                {TEXTS.settings.save.toUpperCase()}
               </>
             )}
           </button>
