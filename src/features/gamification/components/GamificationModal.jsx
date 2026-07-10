@@ -1,12 +1,14 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trophy, Medal } from 'lucide-react';
+import { X, Trophy, Medal, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import AchievementsPanel from './AchievementsPanel';
 import LeaderboardPanel from './LeaderboardPanel';
 
 const GamificationModal = ({ isOpen, onClose }) => {
     const { t } = useTranslation();
+    const user = useSelector((state) => state.auth.user);
     const [activeTab, setActiveTab] = React.useState('achievements');
 
     return (
@@ -63,7 +65,20 @@ const GamificationModal = ({ isOpen, onClose }) => {
                     </div>
 
                     <AnimatePresence mode="wait">
-                        {activeTab === 'achievements' ? (
+                        {!user ? (
+                            <motion.div
+                                key="unauth"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.2 }}
+                                className="flex flex-col items-center justify-center p-12 text-center"
+                            >
+                                <Lock size={48} className="text-white/20 mb-4 mx-auto" />
+                                <h3 className="text-white font-bold text-xl mb-2">{t('auth.loginRequired', 'Debes iniciar sesión')}</h3>
+                                <p className="text-white/50 text-sm">{t('stats.loginToView', 'Para ver logros y estadísticas necesitas una cuenta.')}</p>
+                            </motion.div>
+                        ) : activeTab === 'achievements' ? (
                             <motion.div
                                 key="achievements"
                                 initial={{ opacity: 0, y: 20 }}
