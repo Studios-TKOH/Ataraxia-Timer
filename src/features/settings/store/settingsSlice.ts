@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { SettingResponseDto, UpdateSettingDto } from '@/features/settings/types/setting.dto';
 import { UISettings } from '../types';
+import { INITIAL_UI_SETTINGS } from '../constants/settings.constants';
 
 export interface SettingsState {
     api: SettingResponseDto | null;
@@ -8,18 +9,6 @@ export interface SettingsState {
     status: 'idle' | 'loading' | 'error';
     error: string | null;
 }
-
-const initialUISettings: UISettings = {
-    theme: 'dark',
-    accentColor: '#14b8a6',
-    bgImage: null,
-    blurIntensity: 0,
-    volume: 50,
-    isMuted: false,
-    pipEnabled: true,
-    is24Hour: false,
-    customShortcuts: {},
-};
 
 const getFallbackApiSettings = (current: SettingResponseDto | null): SettingResponseDto => ({
     id: current?.id || '',
@@ -40,7 +29,7 @@ const getFallbackApiSettings = (current: SettingResponseDto | null): SettingResp
 
 const initialState: SettingsState = {
     api: null,
-    ui: initialUISettings,
+    ui: INITIAL_UI_SETTINGS,
     status: 'idle',
     error: null,
 };
