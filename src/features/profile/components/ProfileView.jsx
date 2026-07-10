@@ -15,6 +15,7 @@ import {
     User,
     Trophy,
     Trash2,
+    Lock,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -121,6 +122,20 @@ const ProfileView = () => {
                     {t('profile.loading')}
                 </div>
             </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center justify-center min-h-[60vh] text-center"
+            >
+                <Lock size={48} className="text-white/20 mb-4 mx-auto" />
+                <h3 className="text-white font-bold text-xl mb-2">{t('auth.loginRequired', 'Debes iniciar sesión')}</h3>
+                <p className="text-white/50 text-sm">{t('profile.loginToView', 'Para ver tu perfil necesitas una cuenta.')}</p>
+            </motion.div>
         );
     }
 
