@@ -241,8 +241,8 @@ function* handleForgotPassword(
     const backendMessage = error.response?.data?.message;
 
     const message =
-      backendMessage === 'Error técnico enviando el correo.'
-        ? 'No se pudo enviar el correo de recuperación. Inténtalo más tarde.'
+      backendMessage === 'Error técnico enviando el correo.' || backendMessage === 'Technical error sending email.'
+        ? 'Could not send recovery email. Try again later.'
         : backendMessage || error.message || 'Could not send password reset email';
 
     yield put(forgotPasswordFailure(message));
