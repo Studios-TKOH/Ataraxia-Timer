@@ -33,6 +33,7 @@ const TaskManager = () => {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [confirmDeleteTaskId, setConfirmDeleteTaskId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -202,109 +203,139 @@ const TaskManager = () => {
 
             const displayColor = tagData?.color || '#5fbfff';
             const isEditing = editingId === task.id;
+            const isConfirmingDelete = confirmDeleteTaskId === task.id;
 
             return (
               <div
                 key={task.id}
-                className={`group flex items-center justify-between gap-2 px-3 py-3 2xl:px-4 2xl:py-3.5 border rounded-2xl transition-all ${task.status === 'DONE'
+                className={`group flex items-center justify-between gap-2 px-3 py-3 2xl:px-4 2xl:py-3.5 border rounded-2xl transition-all min-h-[50px] ${task.status === 'DONE'
                   ? 'bg-black/20 border-white/5 opacity-40'
                   : 'bg-surface/40 border-white/5 hover:border-white/10'
                   }`}
               >
-                <div className="flex flex-1 items-center gap-2.5 2xl:gap-3 min-w-0">
-                  <button
-                    type="button"
-                    onClick={() => toggleTask(task)}
-                    className="shrink-0"
-                  >
-                    {task.status === 'DONE' ? (
-                      <CheckCircle2 className="text-[#00ffd5]" size={20} />
-                    ) : (
-                      <Circle className="text-white/20" size={20} />
-                    )}
-                  </button>
-
-                  <div className="flex-1 min-w-0">
-                    {isEditing ? (
-                      <div className="flex items-center gap-2 min-w-0">
-                        <input
-                          autoFocus
-                          type="text"
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handleSaveEdit(task.id);
-                            }
-                          }}
-                          className="flex-1 bg-transparent py-1 border-[#00ffd5] border-b outline-none font-bold text-white text-sm min-w-0"
-                        />
-
-                        <button
-                          type="button"
-                          onClick={() => handleSaveEdit(task.id)}
-                          className="p-1 text-[#00ffd5] shrink-0"
-                        >
-                          <Check size={15} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setEditingId(null)}
-                          className="p-1 text-white/20 hover:text-white/60 shrink-0"
-                        >
-                          <X size={15} />
-                        </button>
-                      </div>
-                    ) : (
-                      <p
-                        className={`font-bold text-[13px] 2xl:text-sm truncate cursor-text ${task.status === 'DONE'
-                          ? 'line-through text-white/20'
-                          : 'text-white/80'
-                          }`}
-                        onDoubleClick={() => handleStartEdit(task)}
+                {isConfirmingDelete ? (
+                  <div className="flex flex-1 items-center justify-between min-w-0" onClick={(e) => e.stopPropagation()}>
+                    <span className="font-bold text-red-500 text-xs truncate mr-2">
+                      Delete task?
+                    </span>
+                    <div className="flex items-center gap-3 shrink-0 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          removeTask(task.id);
+                          setConfirmDeleteTaskId(null);
+                        }}
+                        className="font-bold text-red-400 hover:text-red-300 uppercase tracking-widest hover:underline cursor-pointer"
                       >
-                        {task.title}
-                      </p>
-                    )}
-
-                    {tagData && (
-                      <div className="flex items-center gap-1.5 mt-1 min-w-0">
-                        <TagIcon size={10} style={{ color: displayColor }} className="shrink-0" />
-
-                        <span
-                          className="font-black text-[8px] uppercase tracking-widest truncate"
-                          style={{
-                            color: displayColor,
-                            opacity: 0.55,
-                          }}
-                        >
-                          {tagData.name}
-                        </span>
-                      </div>
-                    )}
+                        Yes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteTaskId(null)}
+                        className="font-bold text-white/40 hover:text-white uppercase tracking-widest hover:underline cursor-pointer"
+                      >
+                        No
+                      </button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="flex flex-1 items-center gap-2.5 2xl:gap-3 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => toggleTask(task)}
+                        className="shrink-0"
+                      >
+                        {task.status === 'DONE' ? (
+                          <CheckCircle2 className="text-[#00ffd5]" size={20} />
+                        ) : (
+                          <Circle className="text-white/20" size={20} />
+                        )}
+                      </button>
 
-                <div className="flex items-center gap-0.5 opacity-50 hover:opacity-100 transition-opacity shrink-0">
-                  {!isEditing && (
-                    <button
-                      type="button"
-                      onClick={() => handleStartEdit(task)}
-                      className="p-1.5 text-white/20 sm:text-white/15 hover:text-white"
-                    >
-                      <Edit2 size={14} />
-                    </button>
-                  )}
+                      <div className="flex-1 min-w-0">
+                        {isEditing ? (
+                          <div className="flex items-center gap-2 min-w-0">
+                            <input
+                              autoFocus
+                              type="text"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleSaveEdit(task.id);
+                                }
+                              }}
+                              className="flex-1 bg-transparent py-1 border-[#00ffd5] border-b outline-none font-bold text-white text-sm min-w-0"
+                            />
 
-                  <button
-                    type="button"
-                    onClick={() => removeTask(task.id)}
-                    className="p-1.5 text-white/20 sm:text-white/15 hover:text-red-500"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+                            <button
+                              type="button"
+                              onClick={() => handleSaveEdit(task.id)}
+                              className="p-1 text-[#00ffd5] shrink-0"
+                            >
+                              <Check size={15} />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setEditingId(null)}
+                              className="p-1 text-white/20 hover:text-white/60 shrink-0"
+                            >
+                              <X size={15} />
+                            </button>
+                          </div>
+                        ) : (
+                          <p
+                            className={`font-bold text-[13px] 2xl:text-sm truncate cursor-text ${task.status === 'DONE'
+                              ? 'line-through text-white/20'
+                              : 'text-white/80'
+                              }`}
+                            onDoubleClick={() => handleStartEdit(task)}
+                          >
+                            {task.title}
+                          </p>
+                        )}
+
+                        {tagData && (
+                          <div className="flex items-center gap-1.5 mt-1 min-w-0">
+                            <TagIcon size={10} style={{ color: displayColor }} className="shrink-0" />
+
+                            <span
+                              className="font-black text-[8px] uppercase tracking-widest truncate"
+                              style={{
+                                color: displayColor,
+                                opacity: 0.55,
+                              }}
+                            >
+                              {tagData.name}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-0.5 opacity-50 hover:opacity-100 transition-opacity shrink-0">
+                      {!isEditing && (
+                        <button
+                          type="button"
+                          onClick={() => handleStartEdit(task)}
+                          className="p-1.5 text-white/20 sm:text-white/15 hover:text-white"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteTaskId(task.id)}
+                        className="p-1.5 text-white/20 sm:text-white/15 hover:text-red-500"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             );
           })
