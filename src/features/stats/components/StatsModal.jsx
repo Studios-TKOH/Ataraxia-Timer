@@ -76,8 +76,8 @@ const StatsModal = ({ isOpen, onClose }) => {
                     ) : !user ? (
                         <div className="flex flex-col items-center justify-center h-64 text-center">
                             <Lock size={48} className="text-white/20 mb-4 mx-auto" />
-                            <h3 className="text-white font-bold text-xl mb-2">{t('auth.loginRequired', 'Debes iniciar sesión')}</h3>
-                            <p className="text-white/50 text-sm">{t('stats.loginToView', 'Para ver tus estadísticas e insights necesitas una cuenta.')}</p>
+                            <h3 className="text-white font-bold text-xl mb-2">{t('auth.loginRequired', 'You must log in')}</h3>
+                            <p className="text-white/50 text-sm">{t('stats.loginToView', 'To view your stats and insights, you need an account.')}</p>
                         </div>
                     ) : (
                         <div className="gap-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
