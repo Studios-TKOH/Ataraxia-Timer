@@ -122,7 +122,7 @@ const TaskManager = () => {
               className="flex justify-center items-center gap-2 border-white/5 hover:border-white/10 bg-black/40 py-3 border rounded-2xl w-full font-bold text-white/50 hover:text-white/80 text-xs uppercase transition-all tracking-widest"
             >
               <Plus size={14} />
-              {t('tags.addTag', 'Añadir etiqueta')}
+              {t('tags.addTag', 'Add category')}
             </button>
           ) : (
             <TagInput
