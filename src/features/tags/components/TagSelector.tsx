@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Tag as TagIcon, ChevronDown, Check, Trash2, Edit2, X } from 'lucide-react';
 import { useTags } from '@/features/tags/hooks/useTags';
 import { TEXTS } from '@/shared/constants/texts.constants';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TagSelectorProps {
     selectedTagId: string | null;
@@ -12,6 +13,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
     const { tags, removeTag, updateTag } = useTags();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const [tagToDelete, setTagToDelete] = useState<{ id: string; name: string } | null>(null);
 
     const [editingTagId, setEditingTagId] = useState<string | null>(null);
     const [editingTagName, setEditingTagName] = useState('');
@@ -49,6 +51,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
     };
 
     return (
+        <>
         <div className="relative w-full" ref={dropdownRef}>
             {/* BOTÓN PRINCIPAL (Actúa como el Select) */}
             <button
@@ -180,12 +183,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
                                                 type="button"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if(window.confirm(TEXTS.tags.deleteConfirm)) {
-                                                        removeTag(tag.id);
-                                                        if (selectedTagId === tag.id) {
-                                                            onSelectTag(null);
-                                                        }
-                                                    }
+                                                    setTagToDelete({ id: tag.id, name: tag.name });
                                                 }}
                                                 className="p-1 text-white/20 hover:text-red-500 hover:scale-115 transition-all cursor-pointer"
                                                 title="Delete Tag"
@@ -205,6 +203,64 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
                 </div>
             )}
         </div>
+        <AnimatePresence>
+            {tagToDelete && (
+                <div className="z-[110] fixed inset-0 flex justify-center items-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setTagToDelete(null)}
+                        className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+                    />
+
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 30 }}
+                        className="relative shadow-2xl p-8 border border-white/10 rounded-[2.5rem] w-full max-w-sm text-center glass"
+                        style={{
+                            boxShadow: '0 0 80px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05)',
+                        }}
+                    >
+                        <div className="flex justify-center mb-6">
+                            <div className="flex justify-center items-center bg-red-500/10 shadow-glow rounded-3xl w-16 h-16 text-red-500 border border-red-500/20">
+                                <Trash2 size={28} />
+                            </div>
+                        </div>
+
+                        <h3 className="mb-2 font-black text-xl italic tracking-tighter text-white">DELETE CATEGORY?</h3>
+                        <p className="mb-6 px-4 font-bold text-white/40 text-[10px] uppercase leading-relaxed tracking-widest">
+                            Are you sure you want to delete <span className="text-white">"{tagToDelete.name}"</span>? This action cannot be undone.
+                        </p>
+
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setTagToDelete(null)}
+                                className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-2xl font-black text-white/70 hover:text-white text-xs uppercase tracking-widest transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    removeTag(tagToDelete.id);
+                                    if (selectedTagId === tagToDelete.id) {
+                                        onSelectTag(null);
+                                    }
+                                    setTagToDelete(null);
+                                }}
+                                className="flex-1 py-3 bg-red-500 hover:bg-red-600 rounded-2xl font-black text-white text-xs uppercase tracking-widest shadow-lg shadow-red-500/20 transition-all"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
+        </>
     );
 };
 

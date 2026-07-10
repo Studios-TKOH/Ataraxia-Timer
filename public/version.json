@@ -1,14 +1,14 @@
 {
-  "version": "2.0.0-ef85f91",
+  "version": "2.0.0-a950bcc",
   "appVersion": "2.0.0",
-  "build": "ef85f91",
-  "date": "2026-07-10T02:45:31.112Z",
+  "build": "a950bcc",
+  "date": "2026-07-10T02:52:07.810Z",
   "changelog": [
-    "chore (version): Version, build, & changelog for release 2.0.0-dc26bb4",
-    "New (translations): English & Spanish translation constants for UI elements",
-    "Tag display fixes",
-    "Improved (tags): Import TAG_POLL_INTERVAL from constants for better configuration management",
-    "chore (translations): English & Spanish translation files"
+    "Improved (translations): Replace useTranslation with direct TEXTS constants",
+    "New (translations): Centralize English UI text constants",
+    "docs (auth): Cookies authentication documentation",
+    "test (pomodoro): Unit tests for timerSlice reducer & mapSettings mapper",
+    "Improved (i18n): I18n configuration file as part of translation cleanup"
   ],
   "targetUrl": "/"
 }
