@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, Target, Zap, CheckCircle2 } from 'lucide-react';
+import { X, Clock, Target, Zap, CheckCircle2, Lock } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { gamificationService } from '../../gamification/api/gamification.api';
@@ -28,14 +28,14 @@ const StatsModal = ({ isOpen, onClose }) => {
     const [loading, setLoading] = React.useState(false);
 
     React.useEffect(() => {
-        if (isOpen) {
+        if (isOpen && user) {
             setLoading(true);
             gamificationService.getStats()
                 .then(data => setStats(data))
                 .catch(err => console.error("Error fetching stats:", err))
                 .finally(() => setLoading(false));
         }
-    }, [isOpen]);
+    }, [isOpen, user]);
 
     return (
         <AnimatePresence>
@@ -72,6 +72,12 @@ const StatsModal = ({ isOpen, onClose }) => {
                     {loading ? (
                         <div className="flex justify-center items-center h-32">
                             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white"></div>
+                        </div>
+                    ) : !user ? (
+                        <div className="flex flex-col items-center justify-center h-64 text-center">
+                            <Lock size={48} className="text-white/20 mb-4 mx-auto" />
+                            <h3 className="text-white font-bold text-xl mb-2">{t('auth.loginRequired', 'Debes iniciar sesión')}</h3>
+                            <p className="text-white/50 text-sm">{t('stats.loginToView', 'Para ver tus estadísticas e insights necesitas una cuenta.')}</p>
                         </div>
                     ) : (
                         <div className="gap-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
