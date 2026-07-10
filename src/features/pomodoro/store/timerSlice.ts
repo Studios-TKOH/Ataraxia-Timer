@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { DEFAULT_FOCUS_TIME } from '../constants/pomodoro.constants'
 
 export type Mode = 'FOCUS' | 'SHORT_BREAK' | 'LONG_BREAK'
 
@@ -11,8 +12,6 @@ interface TimerState {
     toast: { isOpen: boolean; message: string }
     serverId?: string
 }
-
-const DEFAULT_FOCUS_TIME = 25 * 60
 
 const initialState: TimerState = {
     mode: 'FOCUS',
