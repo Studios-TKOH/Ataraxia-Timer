@@ -4,13 +4,6 @@ import { vi } from 'vitest';
 import LeaderboardPanel from '@/features/gamification/components/LeaderboardPanel';
 import { gamificationService } from '@/features/gamification/api/gamification.api';
 
-// Mock translation hook
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key) => key,
-  }),
-}));
-
 // Mock gamification service
 vi.mock('@/features/gamification/api/gamification.api', () => ({
   gamificationService: {
@@ -28,7 +21,7 @@ describe('LeaderboardPanel', () => {
         
         const { container } = render(<LeaderboardPanel />);
         expect(container.querySelector('.animate-spin')).toBeInTheDocument();
-        expect(screen.getByText('gamification.leaderboard')).toBeInTheDocument();
+        expect(screen.getByText('Leaderboard')).toBeInTheDocument();
     });
 
     it('renders empty state if leaderboard is empty', async () => {
@@ -37,7 +30,7 @@ describe('LeaderboardPanel', () => {
         render(<LeaderboardPanel />);
         
         await waitFor(() => {
-            expect(screen.getByText('gamification.noRankings')).toBeInTheDocument();
+            expect(screen.getByText('No rankings available')).toBeInTheDocument();
         });
     });
 
