@@ -24,15 +24,7 @@ import {
   updateSettingsRequest,
 } from '@/features/settings/store/settingsSlice';
 import { sanitizeImageUrl } from '@/shared/utils/sanitize';
-
-const defaultShortcuts = {
-  settings: 's',
-  support: 'h',
-  music: 'm',
-  games: 'g',
-  stats: 't',
-  achievements: 'a',
-};
+import { DEFAULT_SHORTCUTS as defaultShortcuts } from '@/features/settings/constants/settings.constants';
 
 const normalizeShortcuts = (shortcuts) => {
   if (!shortcuts || Object.keys(shortcuts).length === 0) {
