@@ -25,6 +25,7 @@ const TaskManager = () => {
   const { tags, addTag, updateTag } = useTags();
 
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
+  const [isAddingFirstTag, setIsAddingFirstTag] = useState(false);
 
   const [name, setName] = useState('');
   const [est, setEst] = useState(1);
@@ -75,6 +76,7 @@ const TaskManager = () => {
     setEst(1);
     setSelectedTagId(null);
     setTagName('General');
+    setIsAddingFirstTag(false);
   };
   const handleStartEdit = (task: TaskResponse) => {
     setEditingId(task.id);
@@ -112,18 +114,40 @@ const TaskManager = () => {
           maxLength={40}
         />
 
-        <TagSelector
-          selectedTagId={selectedTagId}
-          onSelectTag={setSelectedTagId}
-        />
+        {tags.length === 0 ? (
+          !isAddingFirstTag ? (
+            <button
+              type="button"
+              onClick={() => setIsAddingFirstTag(true)}
+              className="flex justify-center items-center gap-2 border-white/5 hover:border-white/10 bg-black/40 py-3 border rounded-2xl w-full font-bold text-white/50 hover:text-white/80 text-xs uppercase transition-all tracking-widest"
+            >
+              <Plus size={14} />
+              {t('tags.addTag', 'Añadir etiqueta')}
+            </button>
+          ) : (
+            <TagInput
+              tagName={tagName}
+              setTagName={setTagName}
+              tagColor={tagColor}
+              setTagColor={setTagColor}
+            />
+          )
+        ) : (
+          <>
+            <TagSelector
+              selectedTagId={selectedTagId}
+              onSelectTag={setSelectedTagId}
+            />
 
-        {!selectedTagId && (
-          <TagInput
-            tagName={tagName}
-            setTagName={setTagName}
-            tagColor={tagColor}
-            setTagColor={setTagColor}
-          />
+            {!selectedTagId && (
+              <TagInput
+                tagName={tagName}
+                setTagName={setTagName}
+                tagColor={tagColor}
+                setTagColor={setTagColor}
+              />
+            )}
+          </>
         )}
 
         <div className="flex items-center gap-2">
