@@ -275,7 +275,7 @@ function* handleLogout(): Generator<any, void, any> {
     yield call(authService.logout);
 
     toast.success('Session closed', { id: TOAST_ID });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Logout failed:', error);
   } finally {
     localStorage.removeItem('token');
