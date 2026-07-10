@@ -13,23 +13,7 @@ const api = rateLimit(axios.create({
         'Content-Type': 'application/json',
     },
     withCredentials: true,
-}), { maxRequests: 10, perMilliseconds: 1000, maxRPS: 10 }); // Limit to 10 requests per second
-
-function parseJwt(token) {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        return JSON.parse(atob(base64));
-    } catch {
-        return null;
-    }
-}
-
-function isTokenExpiringSoon(token, marginMs = 60_000) {
-    const payload = parseJwt(token);
-    if (!payload?.exp) return true;
-    return Date.now() >= payload.exp * 1000 - marginMs;
-}
+}), { maxRequests: 10, perMilliseconds: 1000, maxRPS: 10 });
 
 let refreshPromise = null;
 
@@ -111,6 +95,22 @@ api.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+function parseJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(base64));
+    } catch {
+        return null;
+    }
+}
+
+function isTokenExpiringSoon(token, marginMs = 60_000) {
+    const payload = parseJwt(token);
+    if (!payload?.exp) return true;
+    return Date.now() >= payload.exp * 1000 - marginMs;
+}
 
 let lastRefreshTime = 0;
 const REFRESH_COOLDOWN_MS = 60 * 60 * 1000;
