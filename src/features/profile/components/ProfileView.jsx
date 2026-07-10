@@ -133,8 +133,8 @@ const ProfileView = () => {
                 className="flex flex-col items-center justify-center min-h-[60vh] text-center"
             >
                 <Lock size={48} className="text-white/20 mb-4 mx-auto" />
-                <h3 className="text-white font-bold text-xl mb-2">{t('auth.loginRequired', 'Debes iniciar sesión')}</h3>
-                <p className="text-white/50 text-sm">{t('profile.loginToView', 'Para ver tu perfil necesitas una cuenta.')}</p>
+                <h3 className="text-white font-bold text-xl mb-2">{t('auth.loginRequired', 'You must log in')}</h3>
+                <p className="text-white/50 text-sm">{t('profile.loginToView', 'To view your profile, you need an account.')}</p>
             </motion.div>
         );
     }
