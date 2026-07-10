@@ -1,14 +1,14 @@
 {
-  "version": "2.0.0-56f4b4d",
+  "version": "2.0.0-e0e0c9f",
   "appVersion": "2.0.0",
-  "build": "56f4b4d",
-  "date": "2026-07-10T03:05:41.772Z",
+  "build": "e0e0c9f",
+  "date": "2026-07-10T03:23:32.996Z",
   "changelog": [
+    "New (tags,tasks): Inline delete confirmation",
     "Tag sync and inline editing",
     "Tag sync and inline editing",
     "Improved (translations): Replace useTranslation with direct TEXTS constants",
-    "New (translations): Centralize English UI text constants",
-    "docs (auth): Cookies authentication documentation"
+    "New (translations): Centralize English UI text constants"
   ],
   "targetUrl": "/"
 }

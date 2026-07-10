@@ -61,16 +61,16 @@ const Header = ({ is24Hour = false, accentColor = '#14b8a6', onOpenSidebar = () 
         </div>
 
         <div className="app-header-clock">
-          <Clock size={15} style={{ color: accentColor }} className="animate-pulse shrink-0" strokeWidth={3} />
+          <Clock size={14} className="text-white/40 shrink-0" strokeWidth={2.5} />
           <span className="app-header-clock-text">{formatTime(currentTime)}</span>
         </div>
       </div>
 
       <div className="app-header-actions">
         {isInstallable && (
-          <button type="button" onClick={handleInstallClick} className="app-header-install" style={{ color: accentColor, borderColor: `${accentColor}4d` }}>
-            <Download size={18} className="animate-bounce shrink-0" />
-            <span className="hidden sm:block ml-3 font-black text-[11px] 2xl:text-sm uppercase">{TEXTS.header.install}</span>
+          <button type="button" onClick={handleInstallClick} className="app-header-install group" style={{ color: accentColor, borderColor: `${accentColor}4d` }}>
+            <Download size={14} className="shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5" />
+            <span className="hidden sm:block ml-2.5 font-bold text-[10px] uppercase tracking-wider">{TEXTS.header.install}</span>
           </button>
         )}
 
@@ -107,11 +107,11 @@ const Header = ({ is24Hour = false, accentColor = '#14b8a6', onOpenSidebar = () 
                 </div>
               )}
               <div className="hidden sm:flex flex-col items-end min-w-0">
-                <span className="font-black text-[10px] text-white sm:text-xs 2xl:text-sm uppercase leading-none tracking-widest truncate max-w-28 2xl:max-w-40">
+                <span className="font-bold text-[10px] text-white sm:text-xs uppercase leading-none tracking-widest truncate max-w-28 2xl:max-w-40">
                   {profile.text}
                 </span>
-                <span className="flex items-center gap-1 mt-1 text-[8px] uppercase tracking-tighter" style={{ color: accentColor }}>
-                  <ShieldCheck size={10} />
+                <span className="flex items-center gap-1 mt-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-400">
+                  <ShieldCheck size={9} />
                   {TEXTS.header.verified}
                 </span>
               </div>

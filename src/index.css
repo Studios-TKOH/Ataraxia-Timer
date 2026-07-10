@@ -75,28 +75,28 @@
   }
 
   .app-header-title {
-    @apply font-black text-white italic uppercase leading-none tracking-tighter truncate;
-    font-size: clamp(1.25rem, 2vw, 2rem);
+    @apply font-display font-extrabold text-white uppercase leading-none tracking-wider truncate;
+    font-size: clamp(1.15rem, 1.8vw, 1.6rem);
   }
 
   .app-header-badge {
-    @apply hidden xs:block bg-accent/10 px-2 py-1 border border-accent/20 rounded-lg shrink-0;
+    @apply hidden xs:block bg-white/5 px-2.5 py-0.5 border border-white/10 rounded-full shrink-0;
   }
 
   .app-header-badge-text {
-    @apply font-black uppercase leading-none tracking-widest;
-    font-size: clamp(0.56rem, 0.75vw, 0.8rem);
+    @apply font-mono text-white/40 uppercase leading-none tracking-widest;
+    font-size: clamp(0.56rem, 0.7vw, 0.75rem);
   }
 
   .app-header-clock {
-    @apply hidden xl:flex items-center bg-white/5 shadow-xl backdrop-blur-2xl border border-white/5 rounded-2xl;
-    gap: clamp(0.65rem, 0.9vw, 1rem);
-    padding: clamp(0.6rem, 0.8vw, 0.8rem) clamp(1rem, 1.4vw, 1.5rem);
+    @apply hidden xl:flex items-center bg-white/5 border border-white/5 rounded-full;
+    gap: clamp(0.5rem, 0.7vw, 0.8rem);
+    padding: clamp(0.4rem, 0.6vw, 0.6rem) clamp(0.8rem, 1.2vw, 1.25rem);
   }
 
   .app-header-clock-text {
-    @apply font-black tabular-nums text-white/60 tracking-widest;
-    font-size: clamp(0.8rem, 1vw, 1.25rem);
+    @apply font-mono text-white/50 tracking-wider tabular-nums;
+    font-size: clamp(0.75rem, 0.9vw, 1.1rem);
   }
 
   .app-header-actions {

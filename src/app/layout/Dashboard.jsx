@@ -93,11 +93,11 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
             <Sidebar
                 isMobileOpen={isSidebarOpen}
                 onCloseMobile={() => setIsSidebarOpen(false)}
-                onOpenSettings={() => setIsSettingsOpen(true)}
-                onOpenSupport={() => setIsSupportOpen(true)}
+                onOpenSettings={() => setIsSettingsOpen((prev) => !prev)}
+                onOpenSupport={() => setIsSupportOpen((prev) => !prev)}
                 onOpenGames={onOpenGames}
-                onOpenStats={() => setIsStatsOpen(true)}
-                onOpenAchievements={() => setIsAchievementsOpen(true)}
+                onOpenStats={() => setIsStatsOpen((prev) => !prev)}
+                onOpenAchievements={() => setIsAchievementsOpen((prev) => !prev)}
                 onOpenMusic={toggleMusic}
                 isMusicOpen={isMusicOpen}
                 customShortcuts={uiSettings.customShortcuts}
@@ -110,7 +110,7 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
                     is24Hour={uiSettings.is24Hour}
                     accentColor={uiSettings.accentColor}
                     onOpenSidebar={() => setIsSidebarOpen(true)}
-                    onOpenProfile={() => setIsProfileOpen(true)}
+                    onOpenProfile={() => setIsProfileOpen((prev) => !prev)}
                 />
 
                 <section className="dashboard-grid">
