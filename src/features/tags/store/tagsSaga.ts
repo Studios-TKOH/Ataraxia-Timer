@@ -11,8 +11,7 @@ import {
     deleteTagRequest, deleteTagSuccess,
     tagsOperationFailure
 } from './tagsSlice';
-
-const TAG_POLL_INTERVAL = 30_000;
+import { TAG_POLL_INTERVAL } from '../constants/tags.constants';
 
 function* pollServerTags(): Generator<any, void, any> {
     while (true) {
