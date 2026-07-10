@@ -1,14 +1,14 @@
 {
-  "version": "2.0.0-a950bcc",
+  "version": "2.0.0-a40a923",
   "appVersion": "2.0.0",
-  "build": "a950bcc",
-  "date": "2026-07-10T02:52:07.810Z",
+  "build": "a40a923",
+  "date": "2026-07-10T02:55:12.569Z",
   "changelog": [
+    "Tag sync and inline editing",
     "Improved (translations): Replace useTranslation with direct TEXTS constants",
     "New (translations): Centralize English UI text constants",
     "docs (auth): Cookies authentication documentation",
-    "test (pomodoro): Unit tests for timerSlice reducer & mapSettings mapper",
-    "Improved (i18n): I18n configuration file as part of translation cleanup"
+    "test (pomodoro): Unit tests for timerSlice reducer & mapSettings mapper"
   ],
   "targetUrl": "/"
 }

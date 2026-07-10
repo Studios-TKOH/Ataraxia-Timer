@@ -13,7 +13,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
     const { tags, removeTag, updateTag } = useTags();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const [tagToDelete, setTagToDelete] = useState<{ id: string; name: string } | null>(null);
+    const [tagToDelete, setTagToDelete] = useState<{ id: string; name: string; color?: string } | null>(null);
 
     const [editingTagId, setEditingTagId] = useState<string | null>(null);
     const [editingTagName, setEditingTagName] = useState('');
@@ -183,7 +183,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
                                                 type="button"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    setTagToDelete({ id: tag.id, name: tag.name });
+                                                    setTagToDelete({ id: tag.id, name: tag.name, color: tag.color });
                                                 }}
                                                 className="p-1 text-white/20 hover:text-red-500 hover:scale-115 transition-all cursor-pointer"
                                                 title="Delete Tag"
@@ -215,46 +215,71 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTagId, onSelectTag })
                     />
 
                     <motion.div
-                        initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                        initial={{ scale: 0.95, opacity: 0, y: 15 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0.9, opacity: 0, y: 30 }}
-                        className="relative shadow-2xl p-8 border border-white/10 rounded-[2.5rem] w-full max-w-sm text-center glass"
-                        style={{
-                            boxShadow: '0 0 80px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05)',
-                        }}
+                        exit={{ scale: 0.95, opacity: 0, y: 15 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                        className="relative flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-red-500/20 rounded-[2rem] w-full max-w-sm overflow-hidden glass"
                     >
-                        <div className="flex justify-center mb-6">
-                            <div className="flex justify-center items-center bg-red-500/10 shadow-glow rounded-3xl w-16 h-16 text-red-500 border border-red-500/20">
-                                <Trash2 size={28} />
+                        <div 
+                            className="h-1.5 w-full shrink-0" 
+                            style={{
+                                background: 'repeating-linear-gradient(45deg, #ef4444, #ef4444 10px, #000 10px, #000 20px)'
+                            }}
+                        />
+
+                        <div className="p-8">
+                            <div className="flex items-center gap-2 mb-3 text-[10px] tracking-[0.2em] font-mono text-red-500">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                                SYS.DESTROY_TAG
                             </div>
-                        </div>
 
-                        <h3 className="mb-2 font-black text-xl italic tracking-tighter text-white">DELETE CATEGORY?</h3>
-                        <p className="mb-6 px-4 font-bold text-white/40 text-[10px] uppercase leading-relaxed tracking-widest">
-                            Are you sure you want to delete <span className="text-white">"{tagToDelete.name}"</span>? This action cannot be undone.
-                        </p>
+                            <h3 className="mb-4 font-black text-2xl text-white tracking-tight leading-none">
+                                Confirm Deletion
+                            </h3>
 
-                        <div className="flex gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setTagToDelete(null)}
-                                className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-2xl font-black text-white/70 hover:text-white text-xs uppercase tracking-widest transition-all"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    removeTag(tagToDelete.id);
-                                    if (selectedTagId === tagToDelete.id) {
-                                        onSelectTag(null);
-                                    }
-                                    setTagToDelete(null);
-                                }}
-                                className="flex-1 py-3 bg-red-500 hover:bg-red-600 rounded-2xl font-black text-white text-xs uppercase tracking-widest shadow-lg shadow-red-500/20 transition-all"
-                            >
-                                Delete
-                            </button>
+                            <div className="flex items-center gap-3 bg-black/40 p-4 border border-white/5 rounded-2xl mb-6">
+                                <div 
+                                    className="w-3 h-3 rounded-full shadow-[0_0_12px_currentColor]"
+                                    style={{ 
+                                        color: tagToDelete.color || '#5fbfff',
+                                        backgroundColor: tagToDelete.color || '#5fbfff' 
+                                    }}
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-[10px] text-white/30 font-mono tracking-wider uppercase">Category to delete</div>
+                                    <div className="font-bold text-white text-xs tracking-widest uppercase truncate">
+                                        {tagToDelete.name}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="mb-8 font-bold text-white/50 text-[10px] uppercase leading-relaxed tracking-widest">
+                                Deleting this category will untag all associated objectives. This action is permanent.
+                            </p>
+
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setTagToDelete(null)}
+                                    className="flex-1 py-3.5 border border-white/10 hover:border-white/20 rounded-xl font-black text-white/60 hover:text-white text-[10px] uppercase tracking-widest transition-colors cursor-pointer"
+                                >
+                                    Dismiss
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        removeTag(tagToDelete.id);
+                                        if (selectedTagId === tagToDelete.id) {
+                                            onSelectTag(null);
+                                        }
+                                        setTagToDelete(null);
+                                    }}
+                                    className="flex-1 py-3.5 bg-red-500 hover:bg-red-600 rounded-xl font-black text-white text-[10px] uppercase tracking-widest shadow-lg shadow-red-500/20 transition-all hover:scale-[1.02] cursor-pointer"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </div>
                     </motion.div>
                 </div>
