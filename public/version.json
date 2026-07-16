@@ -1,14 +1,14 @@
 {
-  "version": "2.0.0-e0e0c9f",
+  "version": "2.0.0-9478077",
   "appVersion": "2.0.0",
-  "build": "e0e0c9f",
-  "date": "2026-07-10T03:23:32.996Z",
+  "build": "9478077",
+  "date": "2026-07-16T04:08:01.042Z",
   "changelog": [
-    "New (tags,tasks): Inline delete confirmation",
-    "Tag sync and inline editing",
-    "Tag sync and inline editing",
-    "Improved (translations): Replace useTranslation with direct TEXTS constants",
-    "New (translations): Centralize English UI text constants"
+    "New (music-widget): Enhance iframe loading state with error handling & retry option",
+    "Login and profile features",
+    "New (terms): IsInline prop to conditionally render header & styles",
+    "New (privacy): IsInline prop to conditionally render header & styles",
+    "New (tsconfig): IgnoreDeprecations option for TypeScript compiler"
   ],
   "targetUrl": "/"
 }
