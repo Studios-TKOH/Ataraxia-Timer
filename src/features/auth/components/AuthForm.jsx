@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User as UserIcon, ArrowRight, Loader2, KeyRound } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Mail, Lock, User as UserIcon, ArrowRight, Loader2, KeyRound, ArrowLeft } from 'lucide-react';
 import {
   loginRequest,
   registerRequest,
   forgotPasswordRequest,
 } from '@/features/auth/store/authSlice';
 import toast from 'react-hot-toast';
+
+const Privacy = lazy(() => import('@/app/pages/Privacy'));
+const Terms = lazy(() => import('@/app/pages/Terms'));
 
 const AuthForm = ({ isLogin, toggleMode }) => {
   const dispatch = useDispatch();
@@ -19,6 +21,7 @@ const AuthForm = ({ isLogin, toggleMode }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [activePage, setActivePage] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,6 +59,25 @@ const AuthForm = ({ isLogin, toggleMode }) => {
 
     dispatch(forgotPasswordRequest({ email: cleanEmail }));
   };
+
+  if (activePage) {
+    return (
+      <div className="mx-auto w-full max-w-lg">
+        <button
+          onClick={() => setActivePage(null)}
+          className="flex items-center gap-2 mb-6 text-white/40 hover:text-white/70 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          <span className="text-xs uppercase tracking-widest">Back to form</span>
+        </button>
+        <div className="max-h-[70vh] overflow-y-auto rounded-2xl bg-[var(--color-surface)] border border-white/10 p-6">
+          <Suspense fallback={<Loader2 className="animate-spin text-white/40" size={24} />}>
+            {activePage === 'privacy' ? <Privacy isInline /> : <Terms isInline />}
+          </Suspense>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-lg">
@@ -152,13 +174,21 @@ const AuthForm = ({ isLogin, toggleMode }) => {
           <div className="text-center mt-2">
             <p className="text-[10px] text-white/30 uppercase tracking-[0.2em]">
               By registering, you agree to our{' '}
-              <Link to="/terms" className="underline hover:text-white/60 transition-colors" target="_blank">
+              <button
+                type="button"
+                onClick={() => setActivePage('terms')}
+                className="underline hover:text-white/60 transition-colors"
+              >
                 Terms
-              </Link>{' '}
+              </button>{' '}
               and{' '}
-              <Link to="/privacy" className="underline hover:text-white/60 transition-colors" target="_blank">
+              <button
+                type="button"
+                onClick={() => setActivePage('privacy')}
+                className="underline hover:text-white/60 transition-colors"
+              >
                 Privacy Policy
-              </Link>
+              </button>
             </p>
           </div>
         )}
