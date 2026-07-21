@@ -119,7 +119,8 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-redux': ['@reduxjs/toolkit', 'react-redux', 'redux-saga'],
           'vendor-db': ['dexie'],
-          'vendor-icons': ['lucide-react']
+          'vendor-icons': ['lucide-react'],
+          'vendor-motion': ['framer-motion']
         }
       }
     }

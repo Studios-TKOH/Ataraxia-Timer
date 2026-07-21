@@ -7,11 +7,11 @@ import { processSyncQueue } from './infrastructure/sync/syncManager';
 import { checkAuthRequest } from './features/auth/store/authSlice';
 import { fetchTasksRequest } from './features/tasks/store/tasksSlice';
 
-import Maintenance from './app/pages/Maintenance';
-import ComingSoon from './app/pages/ComingSoon';
-import Restricted from './app/pages/Restricted';
 import { Loader } from './shared/ui/feedback/Loader';
 
+const Maintenance = lazy(() => import('./app/pages/Maintenance'));
+const ComingSoon = lazy(() => import('./app/pages/ComingSoon'));
+const Restricted = lazy(() => import('./app/pages/Restricted'));
 const Dashboard = lazy(() => import('./app/layout/Dashboard'));
 const ResetPassword = lazy(() => import('./features/auth/components/ResetPassword'));
 const Privacy = lazy(() => import('./app/pages/Privacy'));
@@ -72,13 +72,13 @@ function App() {
     };
   }, [dispatch, isMaintenance, isComingSoon, isRestricted]);
 
-  if (isRestricted) return <Restricted />;
-  if (isMaintenance) return <Maintenance />;
-  if (isComingSoon) return <ComingSoon />;
+  if (isRestricted) return <Suspense fallback={null}><Restricted /></Suspense>;
+  if (isMaintenance) return <Suspense fallback={null}><Maintenance /></Suspense>;
+  if (isComingSoon) return <Suspense fallback={null}><ComingSoon /></Suspense>;
 
   const renderHomeContent = () => {
     if (['games', 'stats', 'achievements'].includes(activeView)) {
-      return <ComingSoon type={activeView} onBack={() => setActiveView('main')} />;
+      return <Suspense fallback={null}><ComingSoon type={activeView} onBack={() => setActiveView('main')} /></Suspense>;
     }
     return (
       <Dashboard
