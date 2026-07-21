@@ -15,11 +15,12 @@ import Sidebar from '@/app/layout/Sidebar';
 import Header from '@/app/layout/Header';
 import TimerDial from '@/features/pomodoro/components/TimerDial';
 import TaskManager from '@/features/tasks/components/TaskManager';
-import SettingsModal from '@/features/settings/components/SettingsModal';
-import SupportModal from '@/shared/ui/modals/SupportModal';
-import MusicWidget from '@/features/pomodoro/components/MusicWidget';
 import PipPortal from '@/features/pomodoro/components/PipPortal';
 import PaintTransitionOverlay from '@/app/components/PaintTransitionOverlay';
+
+const SettingsModal = React.lazy(() => import('@/features/settings/components/SettingsModal'));
+const SupportModal = React.lazy(() => import('@/shared/ui/modals/SupportModal'));
+const MusicWidget = React.lazy(() => import('@/features/pomodoro/components/MusicWidget'));
 const ProfileModal = React.lazy(() => import('@/features/profile/components/ProfileModal'));
 const StatsModal = React.lazy(() => import('@/features/stats/components/StatsModal'));
 const GamificationModal = React.lazy(() => import('@/features/gamification/components/GamificationModal'));
@@ -222,17 +223,21 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
 
             <AnimatePresence>
                 {isSettingsOpen && (
-                    <SettingsModal
-                        isOpen={isSettingsOpen}
-                        onClose={() => setIsSettingsOpen(false)}
-                    />
+                    <React.Suspense fallback={null}>
+                        <SettingsModal
+                            isOpen={isSettingsOpen}
+                            onClose={() => setIsSettingsOpen(false)}
+                        />
+                    </React.Suspense>
                 )}
 
                 {isSupportOpen && (
-                    <SupportModal
-                        isOpen={isSupportOpen}
-                        onClose={() => setIsSupportOpen(false)}
-                    />
+                    <React.Suspense fallback={null}>
+                        <SupportModal
+                            isOpen={isSupportOpen}
+                            onClose={() => setIsSupportOpen(false)}
+                        />
+                    </React.Suspense>
                 )}
 
                 {isProfileOpen && (
@@ -297,10 +302,12 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
                 )}
             </AnimatePresence>
 
-            <MusicWidget
-                isOpen={isMusicOpen}
-                onClose={closeMusic}
-            />
+            <React.Suspense fallback={null}>
+                <MusicWidget
+                    isOpen={isMusicOpen}
+                    onClose={closeMusic}
+                />
+            </React.Suspense>
 
             <PaintTransitionOverlay
                 triggerRef={triggerPaintRef}

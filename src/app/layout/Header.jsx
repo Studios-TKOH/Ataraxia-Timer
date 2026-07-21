@@ -95,6 +95,8 @@ const Header = ({ is24Hour = false, accentColor = '#14b8a6', onOpenSidebar = () 
                   src={sanitizeImageUrl(authUser.avatarUrl) || authUser.avatarUrl}
                   alt=""
                   effect="blur"
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full object-cover ring-2 shrink-0 transition-all group-hover:ring-[var(--accent)]"
                   style={{ '--accent': accentColor, ringColor: accentColor }}
                 />

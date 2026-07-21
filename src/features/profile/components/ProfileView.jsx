@@ -152,6 +152,8 @@ const ProfileView = () => {
                                 src={sanitizeImageUrl(user.avatarUrl) || user.avatarUrl}
                                 alt="Avatar"
                                 effect="blur"
+                                width={112}
+                                height={112}
                                 className="w-full h-full object-cover"
                             />
                         ) : (

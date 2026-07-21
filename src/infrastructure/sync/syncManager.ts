@@ -125,7 +125,9 @@ const applySyncedEntity = async (item: SyncQueueItem, responseData: any) => {
 }
 
 let lastSyncTime = 0
+let lastPullTime = 0
 const SYNC_COOLDOWN_MS = 5000 // 5 seconds cooldown
+const PULL_THROTTLE_MS = 15000 // 15 seconds pull throttle when queue is empty
 
 export const processSyncQueue = async () => {
   if (syncing || !navigator.onLine) return
@@ -193,15 +195,18 @@ export const processSyncQueue = async () => {
       }
     }
 
-    // Now pull updates
-    try {
-      const lastSync = localStorage.getItem('ataraxia_lastSyncCursor') || undefined
-      const params = new URLSearchParams()
-      if (lastSync) params.set('cursor', lastSync)
-      params.set('limit', '100')
-      params.set('entityTypes', 'tasks,settings,tags')
+    // Now pull updates (throttled if no local mutations occurred)
+    const shouldPull = queue.length > 0 || (now - lastPullTime >= PULL_THROTTLE_MS)
+    if (shouldPull) {
+      lastPullTime = now
+      try {
+        const lastSync = localStorage.getItem('ataraxia_lastSyncCursor') || undefined
+        const params = new URLSearchParams()
+        if (lastSync) params.set('cursor', lastSync)
+        params.set('limit', '100')
+        params.set('entityTypes', 'tasks,settings,tags')
 
-      const { data: response } = await api.get(`/sync/pull?${params.toString()}`)
+        const { data: response } = await api.get(`/sync/pull?${params.toString()}`)
 
       if (response.changes && response.changes.length > 0) {
         const entityToTable: Record<string, keyof AppDB> = {
@@ -251,6 +256,7 @@ export const processSyncQueue = async () => {
         console.error('Error pulling updates:', error)
       }
     }
+  }
 
   } finally {
     syncing = false

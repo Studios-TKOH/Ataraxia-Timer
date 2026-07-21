@@ -85,6 +85,7 @@ const MusicWidget = ({ isOpen, onClose }) => {
                     <iframe
                         ref={iframeRef}
                         src="https://www.lofi.cafe/"
+                        loading="lazy"
                         className="border-none w-full h-full"
                         title="Lofi Cafe"
                         allow="autoplay; encrypted-media; fullscreen"

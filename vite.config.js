@@ -106,12 +106,20 @@ export default defineConfig({
     })
   ],
 
+  esbuild: {
+    drop: ['console', 'debugger']
+  },
+
   build: {
+    target: 'es2022',
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'framer-motion'],
-          redux: ['@reduxjs/toolkit', 'react-redux']
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-redux': ['@reduxjs/toolkit', 'react-redux', 'redux-saga'],
+          'vendor-db': ['dexie'],
+          'vendor-icons': ['lucide-react']
         }
       }
     }
