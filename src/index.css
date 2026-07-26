@@ -66,7 +66,7 @@
   .app-header {
     @apply z-50 flex justify-between items-center w-full min-w-0 shrink-0;
     gap: clamp(0.75rem, 1.6vw, 1.5rem);
-    padding: var(--shell-top) var(--shell-x) clamp(0.75rem, 2dvh, 1.25rem);
+    padding: max(var(--shell-top), env(safe-area-inset-top)) max(var(--shell-x), env(safe-area-inset-right)) clamp(0.75rem, 2dvh, 1.25rem) max(var(--shell-x), env(safe-area-inset-left));
   }
 
   .app-header-brand {
@@ -136,7 +136,7 @@
     flex: 1;
     min-width: 0;
     min-height: 0;
-    padding: 0 var(--shell-x) var(--shell-bottom);
+    padding: 0 max(var(--shell-x), env(safe-area-inset-right)) max(var(--shell-bottom), env(safe-area-inset-bottom)) max(var(--shell-x), env(safe-area-inset-left));
   }
 
   .dashboard-timer-zone {
@@ -185,9 +185,9 @@
   }
 
   .mode-tab {
-    @apply shrink-0 rounded-full font-black uppercase transition-all;
-    padding: clamp(0.6rem, 1.2vw, 0.75rem) clamp(1rem, 2vw, 1.55rem);
-    font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+    @apply shrink-0 rounded-full font-black uppercase transition-all active:scale-95;
+    padding: clamp(0.8rem, 1.5vw, 1.1rem) clamp(1.2rem, 2vw, 1.8rem);
+    font-size: clamp(0.75rem, 0.9vw, 0.85rem);
     letter-spacing: clamp(0.12em, 0.3vw, 0.2em);
   }
 
@@ -204,12 +204,12 @@
   }
 
   .timer-primary-action {
-    @apply flex justify-center items-center bg-accent rounded-full font-black text-white uppercase active:scale-95 transition-all;
+    @apply flex justify-center items-center bg-accent rounded-full font-black text-white uppercase active:scale-[0.97] transition-all;
     gap: clamp(0.4rem, 1vw, 0.8rem);
-    min-width: clamp(9rem, 20vw, 12rem);
-    height: clamp(3rem, 4.5vw, 4.2rem);
-    padding-inline: clamp(1.2rem, 3vw, 3.25rem);
-    font-size: clamp(0.7rem, 1vw, 0.92rem);
+    min-width: clamp(10rem, 20vw, 14rem);
+    height: clamp(3.5rem, 4.5vw, 4.5rem);
+    padding-inline: clamp(1.5rem, 3vw, 3.5rem);
+    font-size: clamp(0.85rem, 1vw, 1rem);
     letter-spacing: clamp(0.1em, 0.35vw, 0.22em);
   }
 }
@@ -463,10 +463,12 @@ aside button {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-aside nav button:hover:not(.bg-accent),
-aside button:hover:not(.bg-accent) {
-  transform: translateX(3px) !important;
-  background-color: var(--color-tabs-bg) !important;
+@media (hover: hover) {
+  aside nav button:hover:not(.bg-accent),
+  aside button:hover:not(.bg-accent) {
+    transform: translateX(3px) !important;
+    background-color: var(--color-tabs-bg) !important;
+  }
 }
 
 header {
@@ -540,9 +542,11 @@ header {
 .mode-tab.text-white\/30 {
   color: var(--color-text-45) !important;
 }
-.mode-tab.text-white\/30:hover {
-  color: var(--color-cream) !important;
-  background-color: var(--color-tabs-bg) !important;
+@media (hover: hover) {
+  .mode-tab.text-white\/30:hover {
+    color: var(--color-cream) !important;
+    background-color: var(--color-tabs-bg) !important;
+  }
 }
 
 /* Timer actions buttons design */
@@ -556,9 +560,11 @@ header {
   color: var(--color-text-45) !important;
   transition: all 0.2s ease !important;
 }
-.timer-icon-action:hover {
-  color: var(--color-cream) !important;
-  background-color: var(--color-tabs-bg) !important;
+@media (hover: hover) {
+  .timer-icon-action:hover {
+    color: var(--color-cream) !important;
+    background-color: var(--color-tabs-bg) !important;
+  }
 }
 .timer-primary-action {
   background-color: var(--color-accent) !important;
