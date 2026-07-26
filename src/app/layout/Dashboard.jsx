@@ -269,32 +269,40 @@ const Dashboard = ({ onOpenGames, onOpenStats, onOpenAchievements }) => {
 
                 {pomodoro.showModeModal && (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+                        initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                        animate={{ opacity: 1, backdropFilter: 'blur(16px)' }}
+                        exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="mode-modal-title"
+                        aria-describedby="mode-modal-desc"
                     >
                         <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-[#1a1a1a] border border-white/10 p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center"
+                            initial={{ scale: 0.95, opacity: 0, y: 20, rotateX: 5 }}
+                            animate={{ scale: 1, opacity: 1, y: 0, rotateX: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 15 }}
+                            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                            className="bg-[#050505]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-3xl border border-white/10 p-8 sm:p-10 rounded-[2rem] max-w-sm w-full text-center ring-1 ring-white/5"
+                            style={{ perspective: '1000px' }}
                         >
-                            <h3 className="text-xl font-bold mb-2 text-white">Change mode?</h3>
-                            <p className="text-white/60 mb-6">Your current session will be reset.</p>
+                            <h3 id="mode-modal-title" className="text-xl sm:text-2xl font-black mb-2 text-white italic tracking-tight uppercase">Change Mode?</h3>
+                            <p id="mode-modal-desc" className="text-white/40 mb-8 text-[11px] sm:text-xs uppercase tracking-widest">Your current session will be reset.</p>
 
-                            <div className="flex gap-3 justify-center">
+                            <div className="flex gap-4 justify-center">
                                 <button
                                     onClick={pomodoro.cancelModeChange}
-                                    className="flex-1 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-medium text-white/80"
+                                    className="flex-1 py-4 px-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all font-bold text-white/60 hover:text-white uppercase text-[10px] sm:text-[11px] tracking-widest focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 active:scale-95"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={pomodoro.confirmModeChange}
-                                    className="flex-1 py-3 px-4 rounded-xl bg-accent hover:opacity-90 transition-opacity font-bold text-white shadow-[0_0_15px_rgba(var(--color-accent-rgb),0.3)]"
+                                    style={{ backgroundColor: uiSettings.accentColor }}
+                                    className="flex-1 py-4 px-4 rounded-2xl transition-all font-black text-white uppercase text-[10px] sm:text-[11px] tracking-[0.2em] shadow-[0_8px_24px_-10px_rgba(var(--color-accent-rgb),0.4)] hover:brightness-110 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 active:scale-95"
                                 >
-                                    Change Mode
+                                    Confirm
                                 </button>
                             </div>
                         </motion.div>
